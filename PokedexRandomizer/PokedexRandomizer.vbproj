@@ -120,8 +120,10 @@
     <Compile Include="EntryDisplay.vb" />
     <Compile Include="FormDisplay.vb" />
     <Compile Include="FormMoveDisplay.vb" />
+    <Compile Include="IPkmnImageFinder.vb" />
     <Compile Include="MoveDisplay.vb" />
     <Compile Include="PkmnDisplay.vb" />
+    <Compile Include="PkmnImageFinderPokesprite.vb" />
     <Compile Include="PkmnInfoRetriever.vb" />
     <Compile Include="PkmnStructs.vb" />
     <Compile Include="SkipsDisplay.vb" />
