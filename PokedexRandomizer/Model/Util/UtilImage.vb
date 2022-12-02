@@ -1,10 +1,16 @@
 ﻿Module UtilImage
     Public Async Function Get_Image_Async(url As String) As Task(Of BitmapImage)
-        Dim client As New System.Net.WebClient
-        Dim uri As New Uri(url)
-        Dim stream = Await client.OpenReadTaskAsync(uri)
-        Dim image = System.Drawing.Image.FromStream(stream)
-        Return Image_To_Image_Source(image)
+        Dim cache As IImageCache = New ImageCacheLayer()
+        Dim cachedImage As BitmapImage = cache.GetImageIfExists(url)
+        If cachedImage Is Nothing Then
+            Dim client As New System.Net.WebClient
+            Dim uri As New Uri(url)
+            Dim stream = Await client.OpenReadTaskAsync(uri)
+            Dim image = System.Drawing.Image.FromStream(stream)
+            cachedImage = Image_To_Image_Source(image)
+            cache.StoreInCache(cachedImage, url)
+        End If
+        Return cachedImage
     End Function
 
     Public Function Image_To_Image_Source(bm As System.Drawing.Bitmap) As BitmapImage
@@ -21,7 +27,7 @@
         Return bmFinal
     End Function
 
-    Public Function Image_Source_To_Image(bm As BitmapImage) As System.Drawing.Bitmap
+    Public Function Image_Source_To_Image(bm As BitmapSource) As System.Drawing.Bitmap
         Using memory As New System.IO.MemoryStream
             Dim enc = New BmpBitmapEncoder
             enc.Frames.Add(BitmapFrame.Create(bm))
