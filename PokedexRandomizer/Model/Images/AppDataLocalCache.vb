@@ -1,4 +1,4 @@
-﻿Public Class ImageCacheLayer
+﻿Public Class AppDataLocalCache
     Implements IImageCache
 
     Private Shared CACHE_DIRECTORY As String = IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "mpagliaro98", "Pokedex Randomizer", "images")
