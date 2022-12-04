@@ -217,7 +217,8 @@
     End Sub
 
     Private Sub MenuCacheClear_Click(sender As Object, e As RoutedEventArgs) Handles MenuCacheClear.Click
-
+        Dim result As Boolean = _pkmnInfoRetriever.ClearCache()
+        MessageBox.Show(If(result, "Successfully cleared cache", "Something went wrong when trying to clear cache. Please try again later"), "Clear Cache", MessageBoxButton.OK)
     End Sub
 #End Region
 
