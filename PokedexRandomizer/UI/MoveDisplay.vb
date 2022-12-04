@@ -97,7 +97,7 @@
         Me.MoveName = name
 
         _typeText = New TextBox With {
-            .Background = Get_Type_Color(type),
+            .Background = GetPkmnTypeColor(type),
             .VerticalAlignment = VerticalAlignment.Center,
             .TextAlignment = TextAlignment.Center,
             .IsReadOnly = True,
@@ -132,9 +132,9 @@
         Me.Children.Add(_accText)
     End Sub
 
-    Public Shared Async Sub Init_Cat_Images(settings As Settings, cache As IImageCache)
-        _catPhysical = Await Get_Image_Async(URL_PHYS, settings, cache)
-        _catSpecial = Await Get_Image_Async(URL_SPEC, settings, cache)
-        _catStatus = Await Get_Image_Async(URL_STAT, settings, cache)
+    Public Shared Async Sub LoadMoveCategoryImagesAsync(settings As Settings, cache As IImageCache)
+        _catPhysical = Await GetImageFromUrlAsync(URL_PHYS, settings, cache)
+        _catSpecial = Await GetImageFromUrlAsync(URL_SPEC, settings, cache)
+        _catStatus = Await GetImageFromUrlAsync(URL_STAT, settings, cache)
     End Sub
 End Class

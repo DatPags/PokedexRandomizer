@@ -95,7 +95,7 @@ Public Class AppDataLocalCache
     End Sub
 
     Private Function GenerateFilename(key As String, ext As String) As String
-        Dim hash As UInteger = Int32_To_UInt32(key.GetHashCode())
+        Dim hash As UInteger = IntegerToUInteger(key.GetHashCode())
         Return hash.ToString & ext
     End Function
 

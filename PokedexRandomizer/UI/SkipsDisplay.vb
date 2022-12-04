@@ -31,7 +31,7 @@
             .Padding = New Thickness(5, 1, 5, 1),
             .Margin = New Thickness(10, 0, 5, 0)
         }
-        _resetButton.AddHandler(Button.ClickEvent, New RoutedEventHandler(AddressOf Skips_Reset))
+        _resetButton.AddHandler(Button.ClickEvent, New RoutedEventHandler(AddressOf ResetSkips))
 
         Me.Children.Add(_skipLabel)
         For skipIdx = 0 To NUM_SKIPS - 1
@@ -40,7 +40,7 @@
         Me.Children.Add(_resetButton)
     End Sub
 
-    Private Sub Skips_Reset(sender As Object, e As RoutedEventArgs)
+    Private Sub ResetSkips(sender As Object, e As RoutedEventArgs)
         For skipIdx = 0 To NUM_SKIPS - 1
             _skipChecks(skipIdx).IsChecked = True
         Next
