@@ -1,25 +1,30 @@
 ﻿Public Class PkmnInfoRetriever
     Private InfoEngine As IPkmnInfoFinder
     Private ImageEngine As IPkmnImageFinder
+    Private InfoCache As IPkmnInfoCache
+    Private ImageCache As IImageCache
     Private _ran As New Random()
 
-    Public Sub New(info As IPkmnInfoFinder, img As IPkmnImageFinder)
-        InfoEngine = info
-        ImageEngine = img
+    Public Sub New(infoEngine As IPkmnInfoFinder, imageEngine As IPkmnImageFinder, Optional infoCache As IPkmnInfoCache = Nothing,
+                   Optional imageCache As IImageCache = Nothing)
+        Me.InfoEngine = infoEngine
+        Me.ImageEngine = imageEngine
+        Me.InfoCache = infoCache
+        Me.ImageCache = imageCache
     End Sub
 
     Public Async Function Get_Pkmn_Info(pkmnNumber As Integer, settings As Settings) As Task(Of Pkmn)
         Dim pkmnInfo As PkmnInfo?
         Dim cache As IPkmnInfoCache = New AppDataLocalCache()
-        If settings.UseCache Then pkmnInfo = cache.GetPkmnInfoIfExists(pkmnNumber.ToString) Else pkmnInfo = Nothing
+        If InfoCache IsNot Nothing AndAlso settings.UseCache Then pkmnInfo = cache.GetPkmnInfoIfExists(pkmnNumber.ToString) Else pkmnInfo = Nothing
 
         If pkmnInfo Is Nothing Then
             pkmnInfo = Await InfoEngine.Get_Pkmn_Info(pkmnNumber)
-            If settings.UseCache Then cache.StorePkmnInfoInCache(pkmnInfo.Value, pkmnNumber.ToString)
+            If InfoCache IsNot Nothing AndAlso settings.UseCache Then cache.StorePkmnInfoInCache(pkmnInfo.Value, pkmnNumber.ToString)
         End If
 
         Dim pkmn As New Pkmn With {.pkmn = pkmnInfo.Value}
-        pkmn.images = Await ImageEngine.Get_All_Images_For_Pkmn(pkmn.pkmn, settings)
+        pkmn.images = Await ImageEngine.Get_All_Images_For_Pkmn(pkmn.pkmn, settings, ImageCache)
         Return pkmn
     End Function
 
