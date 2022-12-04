@@ -27,6 +27,7 @@
                         </TextBlock>
                     </MenuItem.ToolTip>
                 </MenuItem>
+                <MenuItem x:Name="MenuCache" Header="_Use Cache (DEBUG)" IsCheckable="True" IsChecked="False" />
             </MenuItem>
         </Menu>
         <TabControl x:Name="TabsBase">

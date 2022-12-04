@@ -19,10 +19,10 @@
         Return urlInfoList
     End Function
 
-    Public Async Function Get_Pkmn_Info(pkmnNumber As Integer, url As String) As Task(Of Pkmn)
-        Dim pkmn As Pkmn
+    Public Async Function Get_Pkmn_Info(pkmnNumber As Integer, url As String, settings As Settings) As Task(Of Pkmn)
+        Dim pkmn As Pkmn, pkmnInfo As PkmnInfo?
         Dim cache As IPkmnInfoCache = New AppDataLocalCache()
-        Dim pkmnInfo As PkmnInfo? = cache.GetPkmnInfoIfExists(url)
+        If settings.UseCache Then pkmnInfo = cache.GetPkmnInfoIfExists(url) Else pkmnInfo = Nothing
 
         If pkmnInfo Is Nothing Then
             Dim html = Await Load_Html_Async(URL_BASE & url)
@@ -38,12 +38,12 @@
             pkmn.pkmn.moveForms = moveData.forms
             pkmn.pkmn.moves = moveData.moves
 
-            cache.StorePkmnInfoInCache(pkmn.pkmn, url)
+            If settings.UseCache Then cache.StorePkmnInfoInCache(pkmn.pkmn, url)
         Else
             pkmn = New Pkmn With {.pkmn = pkmnInfo.Value}
         End If
 
-        pkmn.images = Await ImageEngine.Get_All_Images_For_Pkmn(pkmn)
+        pkmn.images = Await ImageEngine.Get_All_Images_For_Pkmn(pkmn, settings)
         Return pkmn
     End Function
 

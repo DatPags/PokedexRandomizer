@@ -120,6 +120,7 @@
     <Compile Include="Model\Images\AppDataLocalCache.vb" />
     <Compile Include="Model\Interfaces\IImageCache.vb" />
     <Compile Include="Model\Interfaces\IPkmnInfoCache.vb" />
+    <Compile Include="Model\Main\Settings.vb" />
     <Compile Include="Model\Util\Extensions.vb" />
     <Compile Include="UI\EntryDisplay.vb" />
     <Compile Include="UI\FormDisplay.vb" />
