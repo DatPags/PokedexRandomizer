@@ -448,9 +448,9 @@
                     Select Case data.moveCountdown
                         Case 4
                             data.tempMove.type = text
-                        Case 2
+                        Case 3
                             data.tempMove.power = text
-                        Case 1
+                        Case 2
                             data.tempMove.accuracy = Decode_Html_String(text)
                             If data.addMoveToAll Then
                                 For formIndex = 0 To data.forms.Count - 1
