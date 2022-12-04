@@ -9,7 +9,7 @@
 
     Private _imageJson As Newtonsoft.Json.Linq.JObject
 
-    Public Async Sub Init_Pkmn_Images() Implements IPkmnImageFinder.Init_Pkmn_Images
+    Public Async Sub Init() Implements IPkmnImageFinder.Init
         Dim text = Await Get_Text_Async(URL_IMG_JSON)
         _imageJson = Newtonsoft.Json.Linq.JObject.Parse(text)
     End Sub

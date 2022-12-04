@@ -2,11 +2,8 @@
     Private Const URL_BASE = "https://pokemondb.net"
     Private Const URL_NATDEX = "/pokedex/national"
 
-    Private Shared ImageEngine As IPkmnImageFinder = New PkmnImageFinderPokesprite
-
-    Public Shared Sub Init_Pkmn_Images()
-        ImageEngine.Init_Pkmn_Images()
-    End Sub
+    Public ImageEngine As IPkmnImageFinder = New PkmnImageFinderPokesprite
+    Public InfoEngine As IPkmnInfoFinder = New PkmnInfoFinderPokemonDB
 
     Public Async Function Url_List() As Task(Of List(Of UrlInfo))
         Dim html = Await Load_Html_Async(URL_BASE & URL_NATDEX)
