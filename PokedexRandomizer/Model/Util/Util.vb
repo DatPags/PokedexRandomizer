@@ -86,14 +86,16 @@
         End If
     End Function
 
-    Public Async Function Get_Text_Async(url As String) As Task(Of String)
-        Dim html As String
-        Dim request = System.Net.WebRequest.Create(url)
-        Using response = Await request.GetResponseAsync
-            Using reader = New System.IO.StreamReader(response.GetResponseStream)
-                html = reader.ReadToEnd
-            End Using
-        End Using
-        Return html
+    <System.Runtime.InteropServices.StructLayout(Runtime.InteropServices.LayoutKind.Explicit)>
+    Structure Int32Union
+        <System.Runtime.InteropServices.FieldOffset(0)>
+        Public Int32 As Integer
+        <System.Runtime.InteropServices.FieldOffset(0)>
+        Public UInt32 As UInteger
+    End Structure
+
+    Public Function Int32_To_UInt32(i As Integer) As UInteger
+        Dim u As New Int32Union With {.Int32 = i}
+        Return u.UInt32
     End Function
 End Module
