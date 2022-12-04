@@ -113,7 +113,7 @@
                         </Grid.ColumnDefinitions>
 
                         <DockPanel Grid.Column="1">
-                            <Label Content="Pokedex Entries" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,5,5,2" FontSize="14" />
+                            <Label Content="Pokédex Entries" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,5,5,2" FontSize="14" />
                             <Border x:Name="HeightHelperE" ScrollViewer.HorizontalScrollBarVisibility="Disabled" DockPanel.Dock="Bottom" Margin="5,2,5,5" >
                                 <ListBox x:Name="EntryListBox" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Height="{Binding Path=ActualHeight, ElementName=HeightHelperE}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                     <ListBox.ItemContainerStyle>
