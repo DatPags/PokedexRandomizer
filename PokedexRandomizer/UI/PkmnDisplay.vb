@@ -1,6 +1,6 @@
 ﻿Public Class PkmnDisplay : Inherits Grid
 
-    Private _pkmnInfo As PkmnInfo
+    Private _pkmnInfo As Pkmn
 
     Private _image As Image
     Private _name As TextBox
@@ -14,7 +14,7 @@
     Private _games As ComboBox
     Private _entry As TextBlock
 
-    Public ReadOnly Property PkmnInfo() As PkmnInfo
+    Public ReadOnly Property PkmnInfo() As Pkmn
         Get
             Return _pkmnInfo
         End Get
@@ -159,24 +159,24 @@
         _name.Text = text
     End Sub
 
-    Public Sub Populate_Display(pkmnInfo As PkmnInfo, formIndex As Integer, gameIndex As Integer, abilityIndex As Integer)
+    Public Sub Populate_Display(pkmnInfo As Pkmn, formIndex As Integer, gameIndex As Integer, abilityIndex As Integer)
         _pkmnInfo = pkmnInfo
 
-        _name.Text = $"#{_pkmnInfo.number} - {_pkmnInfo.name}"
-        If _pkmnInfo.forms.Count > 1 Then
-            _forms.ItemsSource = _pkmnInfo.forms
+        _name.Text = $"#{_pkmnInfo.pkmn.number} - {_pkmnInfo.pkmn.name}"
+        If _pkmnInfo.pkmn.forms.Count > 1 Then
+            _forms.ItemsSource = _pkmnInfo.pkmn.forms
         Else
             _forms.ItemsSource = New List(Of String) From {{""}}
         End If
-        _games.ItemsSource = _pkmnInfo.games
+        _games.ItemsSource = _pkmnInfo.pkmn.games
 
-        If _pkmnInfo.forms.Count > 1 Then
-            _forms.SelectedValue = _pkmnInfo.forms(formIndex)
+        If _pkmnInfo.pkmn.forms.Count > 1 Then
+            _forms.SelectedValue = _pkmnInfo.pkmn.forms(formIndex)
         Else
             _forms.SelectedValue = ""
         End If
 
-        _games.SelectedValue = _pkmnInfo.games(gameIndex)
+        _games.SelectedValue = _pkmnInfo.pkmn.games(gameIndex)
 
         _abilities.SelectedIndex = abilityIndex
     End Sub
@@ -202,14 +202,14 @@
         Dim formIndex As Integer = _forms.SelectedIndex
         If formIndex >= 0 Then
             _image.Source = _pkmnInfo.images(formIndex)
-            _class.Text = _pkmnInfo.species(formIndex)
-            _type1.Text = _pkmnInfo.types(formIndex)(0)
-            _type1.Background = Get_Type_Color(_pkmnInfo.types(formIndex)(0))
-            _type2.Text = _pkmnInfo.types(formIndex)(1)
-            _type2.Background = Get_Type_Color(_pkmnInfo.types(formIndex)(1))
-            _height.Text = _pkmnInfo.height(formIndex)
-            _weight.Text = _pkmnInfo.weight(formIndex)
-            _abilities.ItemsSource = _pkmnInfo.abilities(formIndex)
+            _class.Text = _pkmnInfo.pkmn.species(formIndex)
+            _type1.Text = _pkmnInfo.pkmn.types(formIndex)(0)
+            _type1.Background = Get_Type_Color(_pkmnInfo.pkmn.types(formIndex)(0))
+            _type2.Text = _pkmnInfo.pkmn.types(formIndex)(1)
+            _type2.Background = Get_Type_Color(_pkmnInfo.pkmn.types(formIndex)(1))
+            _height.Text = _pkmnInfo.pkmn.height(formIndex)
+            _weight.Text = _pkmnInfo.pkmn.weight(formIndex)
+            _abilities.ItemsSource = _pkmnInfo.pkmn.abilities(formIndex)
             _abilities.SelectedIndex = 0
         End If
     End Sub
@@ -217,7 +217,7 @@
     Private Sub Game_Change(sender As Object, e As SelectionChangedEventArgs)
         Dim gameIndex As Integer = _games.SelectedIndex
         If gameIndex >= 0 Then
-            _entry.Text = _pkmnInfo.entries(gameIndex)
+            _entry.Text = _pkmnInfo.pkmn.entries(gameIndex)
         End If
     End Sub
 End Class

@@ -1,4 +1,10 @@
-﻿Public Structure PkmnInfo
+﻿Public Structure Pkmn
+    Public pkmn As PkmnInfo
+    Public images As List(Of BitmapImage)
+End Structure
+
+<Serializable()>
+Public Structure PkmnInfo
     Public number As Integer
     Public name As String
     Public forms As List(Of String)
@@ -8,12 +14,12 @@
     Public weight As List(Of String)
     Public games As List(Of String)
     Public entries As List(Of String)
-    Public images As List(Of BitmapImage)
     Public moveForms As List(Of String)
     Public moves As List(Of List(Of MoveInfo))
     Public abilities As List(Of List(Of String))
 End Structure
 
+<Serializable()>
 Public Structure MoveInfo
     Public name As String
     Public type As String
@@ -180,11 +186,12 @@ Module PkmnStructs
             .tempMove = Nothing}
     End Function
 
-    Public Function Load_Info_Into_PkmnInfo(data As GatherInfoData) As PkmnInfo
-        Return New PkmnInfo With {.number = data.number, .name = data.name, .forms = data.forms,
+    Public Function Load_Info_Into_PkmnInfo(data As GatherInfoData) As Pkmn
+        Dim info = New PkmnInfo With {.number = data.number, .name = data.name, .forms = data.forms,
             .species = data.classifications, .types = data.types, .height = data.heights, .weight = data.weights,
-            .games = data.games, .entries = data.entries, .images = New List(Of BitmapImage),
+            .games = data.games, .entries = data.entries,
             .moveForms = New List(Of String), .moves = New List(Of List(Of MoveInfo)),
             .abilities = data.abilities}
+        Return New Pkmn With {.pkmn = info, .images = New List(Of BitmapImage)}
     End Function
 End Module

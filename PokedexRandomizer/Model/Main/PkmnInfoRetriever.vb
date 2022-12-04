@@ -19,22 +19,32 @@
         Return urlInfoList
     End Function
 
-    Public Async Function Get_Pkmn_Info(pkmnNumber As Integer, url As String, Optional getMoves As Boolean = False) As Task(Of PkmnInfo)
-        Dim html = Await Load_Html_Async(URL_BASE & url)
-        Dim data = New_GatherInfoData(pkmnNumber)
-        Parse_Html_Pkmn_Info(html, data)
-        data.heights = Decode_Html_String_List(data.heights)
-        Dim pkmnInfo = Load_Info_Into_PkmnInfo(data)
-        If getMoves Then
+    Public Async Function Get_Pkmn_Info(pkmnNumber As Integer, url As String) As Task(Of Pkmn)
+        Dim pkmn As Pkmn
+        Dim cache As IPkmnInfoCache = New AppDataLocalCache()
+        Dim pkmnInfo As PkmnInfo? = cache.GetPkmnInfoIfExists(url)
+
+        If pkmnInfo Is Nothing Then
+            Dim html = Await Load_Html_Async(URL_BASE & url)
+            Dim data = New_GatherInfoData(pkmnNumber)
+            Parse_Html_Pkmn_Info(html, data)
+            data.heights = Decode_Html_String_List(data.heights)
+            pkmn = Load_Info_Into_PkmnInfo(data)
+
             Dim moveData = New_GatherMovesData(pkmnNumber)
             Parse_Html_Moves(html, moveData)
             Remove_Duplicates(moveData.moves)
             Condense_Move_Lists(moveData)
-            pkmnInfo.moveForms = moveData.forms
-            pkmnInfo.moves = moveData.moves
+            pkmn.pkmn.moveForms = moveData.forms
+            pkmn.pkmn.moves = moveData.moves
+
+            cache.StorePkmnInfoInCache(pkmn.pkmn, url)
+        Else
+            pkmn = New Pkmn With {.pkmn = pkmnInfo.Value}
         End If
-        pkmnInfo.images = Await ImageEngine.Get_All_Images_For_Pkmn(pkmnInfo)
-        Return pkmnInfo
+
+        pkmn.images = Await ImageEngine.Get_All_Images_For_Pkmn(pkmn)
+        Return pkmn
     End Function
 
 #Region "Html Utilities"
