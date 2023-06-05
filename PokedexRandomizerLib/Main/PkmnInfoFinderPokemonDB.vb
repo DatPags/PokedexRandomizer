@@ -115,10 +115,10 @@
     Public Async Function GetPkmnInfoAsync(pkmnNumber As Integer) As Task(Of PkmnInfo) Implements IPkmnInfoFinder.GetPkmnInfoAsync
         Dim url As String = _urlList(pkmnNumber - 1).url
 
-        Dim html = Await GetHtmlAsync(URL_BASE & url)
+        Dim html = Await UtilWeb.GetHtmlAsync(URL_BASE & url)
         Dim data = New_GatherInfoData(pkmnNumber)
         ParseHtmlIntoGatherInfoData(html, data)
-        data.heights = DecodeHtmlStringList(data.heights)
+        data.heights = UtilWeb.DecodeHtmlStringList(data.heights)
         Dim pkmnInfo As PkmnInfo = LoadGatherInfoDataIntoPkmnInfo(data)
 
         Dim moveData = New_GatherMovesData(pkmnNumber)
@@ -132,7 +132,7 @@
     End Function
 
     Private Async Function GetUrlListAsync() As Task(Of List(Of UrlInfo))
-        Dim html = Await GetHtmlAsync(URL_BASE & URL_NATDEX)
+        Dim html = Await UtilWeb.GetHtmlAsync(URL_BASE & URL_NATDEX)
         Dim data = New_UrlMapData()
         ParseHtmlIntoUrlMapData(html, data)
         Dim urlInfoList = New List(Of UrlInfo)
@@ -513,7 +513,7 @@
                             ' ahref tag starting with /move/ indicates next data is a move name
                             data.nextMove = True
                         End If
-                    ElseIf name = "span" And attrName = "title" Then
+                    ElseIf name = "img" And attrName = "title" Then
                         If data.moveCountdown = 3 Then
                             ' <img title="-"> will be a move category during a move countdown
                             data.tempMove.category = attrValue
@@ -620,7 +620,7 @@
                         Case 3
                             data.tempMove.power = text
                         Case 2
-                            data.tempMove.accuracy = DecodeHtmlString(text)
+                            data.tempMove.accuracy = UtilWeb.DecodeHtmlString(text)
                             If data.addMoveToAll Then
                                 For formIndex = 0 To data.forms.Count - 1
                                     data.moves(formIndex).Add(data.tempMove)

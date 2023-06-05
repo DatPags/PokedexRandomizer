@@ -117,26 +117,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Model\Interfaces\IPkmnInfoFinder.vb" />
-    <Compile Include="Model\Main\AppDataLocalCache.vb" />
-    <Compile Include="Model\Interfaces\IImageCache.vb" />
-    <Compile Include="Model\Interfaces\IPkmnInfoCache.vb" />
-    <Compile Include="Model\Main\PkmnInfoFinderPokemonDB.vb" />
-    <Compile Include="Model\Main\Settings.vb" />
-    <Compile Include="Model\Util\Extensions.vb" />
-    <Compile Include="Model\Util\UtilWeb.vb" />
     <Compile Include="UI\EntryDisplay.vb" />
     <Compile Include="UI\FormDisplay.vb" />
     <Compile Include="UI\FormMoveDisplay.vb" />
-    <Compile Include="Model\Interfaces\IPkmnImageFinder.vb" />
     <Compile Include="UI\MoveDisplay.vb" />
     <Compile Include="UI\PkmnDisplay.vb" />
-    <Compile Include="Model\Main\PkmnImageFinderPokesprite.vb" />
-    <Compile Include="Model\Main\PkmnInfoRetriever.vb" />
-    <Compile Include="Model\Main\PkmnStructs.vb" />
     <Compile Include="UI\SkipsDisplay.vb" />
-    <Compile Include="Model\Util\Util.vb" />
-    <Compile Include="Model\Util\UtilImage.vb" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -216,6 +202,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PokedexRandomizerLib\PokedexRandomizerLib.vbproj">
+      <Project>{5eae870e-b583-46db-8175-e68c17cfed50}</Project>
+      <Name>PokedexRandomizerLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>
