@@ -67,6 +67,10 @@ Public Class MoveDisplay : Inherits Grid
             Return _accVal
         End Get
         Set(value As String)
+            Dim acc As Integer
+            If Integer.TryParse(value, acc) AndAlso acc > 100 Then
+                value = "∞"
+            End If
             _accVal = value
             _accText.Content = "Acc: " & value
         End Set
