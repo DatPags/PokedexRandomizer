@@ -57,7 +57,7 @@
                             <ColumnDefinition Width='1*' />
                         </Grid.ColumnDefinitions>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5" Grid.Column="1">
-                            <TextBox x:Name="MovesTextBox" Margin="10,0,5,0" MaxLength="12" MinWidth="150" TextAlignment="Center" FontSize="16" VerticalAlignment="Center" MaxWidth="150" />
+                            <TextBox x:Name="MovesTextBox" Margin="10,0,5,0" MaxLength="20" MinWidth="150" TextAlignment="Center" FontSize="16" VerticalAlignment="Center" MaxWidth="150" />
                             <Button x:Name="MovesButton" Content="Get Random Moves" Margin="5,0,10,0" IsEnabled="False" FontSize="16" Padding="10,5" />
                         </StackPanel>
                     </Grid>
@@ -102,7 +102,7 @@
                             <ColumnDefinition Width='1*' />
                         </Grid.ColumnDefinitions>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5" Grid.Column="1">
-                            <TextBox x:Name="ManualTextBox" Margin="10,0,5,0" MaxLength="12" MinWidth="150" TextAlignment="Center" FontSize="16" VerticalAlignment="Center" MaxWidth="150" />
+                            <TextBox x:Name="ManualTextBox" Margin="10,0,5,0" MaxLength="20" MinWidth="150" TextAlignment="Center" FontSize="16" VerticalAlignment="Center" MaxWidth="150" />
                             <Button x:Name="ManualButton" Content="Get Pokemon Info" Margin="5,0,10,0" IsEnabled="False" FontSize="16" Padding="10,5" />
                         </StackPanel>
                     </Grid>

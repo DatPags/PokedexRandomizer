@@ -25,7 +25,7 @@ Public Class PkmnInfoFinderLocal
     End Function
 
     Public Function DoesPkmnExist(pkmnName As String) As Boolean Implements IPkmnInfoFinder.DoesPkmnExist
-        Return data.ToList().Exists(Function(p) p.Value.name.ToUpper = pkmnName.ToUpper)
+        Return data.ToList().Exists(Function(p) CleanPkmnName(p.Value.name) = CleanPkmnName(pkmnName))
     End Function
 
     Public Function DoesPkmnExist(pkmnNumber As Integer) As Boolean Implements IPkmnInfoFinder.DoesPkmnExist
@@ -33,8 +33,12 @@ Public Class PkmnInfoFinderLocal
     End Function
 
     Public Function PkmnNameToNumber(pkmnName As String) As Integer Implements IPkmnInfoFinder.PkmnNameToNumber
-        Dim kv = data.ToList().Find(Function(p) p.Value.name.ToUpper = pkmnName.ToUpper)
+        Dim kv = data.ToList().Find(Function(p) CleanPkmnName(p.Value.name) = CleanPkmnName(pkmnName))
         Return kv.Key
+    End Function
+
+    Private Function CleanPkmnName(name As String) As String
+        Return name.ToLower.Replace("é", "e").Replace("♀", "-f").Replace("♂", "-m")
     End Function
 
     Public Async Function GetPkmnInfoAsync(pkmnNumber As Integer) As Task(Of PkmnInfo) Implements IPkmnInfoFinder.GetPkmnInfoAsync
