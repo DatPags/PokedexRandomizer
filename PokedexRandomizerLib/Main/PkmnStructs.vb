@@ -2,6 +2,7 @@
 
 Public Structure Pkmn
     Public pkmn As PkmnInfo
+    Public icons As List(Of Image)
     Public images As List(Of Image)
 End Structure
 

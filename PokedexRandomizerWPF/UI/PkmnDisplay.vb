@@ -38,7 +38,7 @@ Public Class PkmnDisplay : Inherits Grid
             .VerticalAlignment = VerticalAlignment.Center,
             .Margin = New Thickness(5, 5, 5, 5)
         }
-        RenderOptions.SetBitmapScalingMode(_image, BitmapScalingMode.NearestNeighbor)
+        RenderOptions.SetBitmapScalingMode(_image, BitmapScalingMode.HighQuality)
 
         _name = New TextBox With {
             .VerticalAlignment = VerticalAlignment.Center,

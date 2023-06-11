@@ -1,19 +1,18 @@
-﻿Imports System.Text
+﻿Imports System.IO
+Imports System.Text
 Imports Newtonsoft.Json
 
 Public Class PkmnInfoFinderLocal
     Implements IPkmnInfoFinder
 
-    Private Shared DIRECTORY_BASE As String = IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "mpagliaro98", "Pokedex Randomizer")
-    Private Shared DATA_FILE As String = IO.Path.Combine(DIRECTORY_BASE, "pkmn.json")
+    Private Shared DATA_FILE As String = IO.Path.Combine(Util.DIRECTORY_BASE, "pkmn.json")
 
     Private data As Dictionary(Of Integer, PkmnInfo)
 
     Public Shared Async Function CreateSelf() As Task(Of IPkmnInfoFinder)
         Dim obj As New PkmnInfoFinderLocal
         If Not IO.File.Exists(DATA_FILE) Then
-            '--TODO download from the web
-            PkmnInfoFinderPokemonDB.CreateJSONFile()
+            Throw New FileNotFoundException("Info data does not exist")
         End If
         Dim bytes = Await System.IO.File.ReadAllBytesAsync(DATA_FILE)
         Dim json As String = Encoding.UTF8.GetString(bytes)
@@ -26,7 +25,7 @@ Public Class PkmnInfoFinderLocal
     End Function
 
     Public Function DoesPkmnExist(pkmnName As String) As Boolean Implements IPkmnInfoFinder.DoesPkmnExist
-        Return data.ToList().Exists(Function(p) p.Value.name = pkmnName)
+        Return data.ToList().Exists(Function(p) p.Value.name.ToUpper = pkmnName.ToUpper)
     End Function
 
     Public Function DoesPkmnExist(pkmnNumber As Integer) As Boolean Implements IPkmnInfoFinder.DoesPkmnExist
@@ -34,7 +33,7 @@ Public Class PkmnInfoFinderLocal
     End Function
 
     Public Function PkmnNameToNumber(pkmnName As String) As Integer Implements IPkmnInfoFinder.PkmnNameToNumber
-        Dim kv = data.ToList().Find(Function(p) p.Value.name = pkmnName)
+        Dim kv = data.ToList().Find(Function(p) p.Value.name.ToUpper = pkmnName.ToUpper)
         Return kv.Key
     End Function
 

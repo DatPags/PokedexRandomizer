@@ -5,9 +5,8 @@ Imports SixLabors.ImageSharp
 Public Class AppDataLocalCache
     Implements IImageCache, IPkmnInfoCache
 
-    Private Shared CACHE_DIRECTORY_BASE As String = IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "mpagliaro98", "Pokedex Randomizer")
-    Private Shared CACHE_DIRECTORY_IMAGES As String = IO.Path.Combine(CACHE_DIRECTORY_BASE, "cached_images")
-    Private Shared CACHE_DIRECTORY_PKMN As String = IO.Path.Combine(CACHE_DIRECTORY_BASE, "cached_data")
+    Private Shared CACHE_DIRECTORY_IMAGES As String = IO.Path.Combine(Util.DIRECTORY_BASE, "cached_images")
+    Private Shared CACHE_DIRECTORY_PKMN As String = IO.Path.Combine(Util.DIRECTORY_BASE, "cached_data")
     Private Const IMAGE_EXT As String = ".png"
     Private Const PKMN_EXT As String = ".json"
     Private Const CACHE_LENGTH_IMAGES_SECONDS As ULong = 60 * 60 * 24 * 30 '30 days

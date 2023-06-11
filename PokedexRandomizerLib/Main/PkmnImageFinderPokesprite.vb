@@ -18,6 +18,10 @@ Public Class PkmnImageFinderPokesprite
         Return obj
     End Function
 
+    Public Async Function GetPkmnIconListAsync(pkmnInfo As PkmnInfo, settings As Settings, cache As IImageCache) As Task(Of List(Of Image)) Implements IPkmnImageFinder.GetPkmnIconListAsync
+        Return Await GetPkmnImageListAsync(pkmnInfo, settings, cache)
+    End Function
+
     Public Async Function GetPkmnImageListAsync(pkmnInfo As PkmnInfo, settings As Settings, cache As IImageCache) As Task(Of List(Of Image)) Implements IPkmnImageFinder.GetPkmnImageListAsync
         Dim imgList As New List(Of Image), baseName As String = "", formsToken As Newtonsoft.Json.Linq.JToken = Nothing, forms As New List(Of Newtonsoft.Json.Linq.JToken)
         Dim imgUnknown As Boolean = False

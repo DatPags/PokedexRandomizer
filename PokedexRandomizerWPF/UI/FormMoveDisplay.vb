@@ -91,7 +91,7 @@ Public Class FormMoveDisplay : Inherits Grid
             .VerticalAlignment = VerticalAlignment.Center,
             .Margin = New Thickness(5, 5, 5, 5)
         }
-        RenderOptions.SetBitmapScalingMode(_image, BitmapScalingMode.NearestNeighbor)
+        RenderOptions.SetBitmapScalingMode(_image, BitmapScalingMode.HighQuality)
         Me.PkmnImage = image.ToBitmapImage
 
         ' Create the text for this form
