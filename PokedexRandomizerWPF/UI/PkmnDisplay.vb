@@ -24,13 +24,13 @@ Public Class PkmnDisplay : Inherits Grid
 
     Public Sub New()
         Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(2.5, GridUnitType.Star)})
-        Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(0.6, GridUnitType.Star)})
-        Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(0.6, GridUnitType.Star)})
-        Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(0.6, GridUnitType.Star)})
-        Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(0.8, GridUnitType.Star)})
-        Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(0.8, GridUnitType.Star)})
-        Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(0.6, GridUnitType.Star)})
-        Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(0.6, GridUnitType.Star)})
+        Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(26, GridUnitType.Pixel)})
+        Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(26, GridUnitType.Pixel)})
+        Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(26, GridUnitType.Pixel)})
+        Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(34, GridUnitType.Pixel)})
+        Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(34, GridUnitType.Pixel)})
+        Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(26, GridUnitType.Pixel)})
+        Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(26, GridUnitType.Pixel)})
         Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(4.0, GridUnitType.Star)})
 
         _image = New Image With {
