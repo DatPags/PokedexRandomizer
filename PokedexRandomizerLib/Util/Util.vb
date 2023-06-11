@@ -67,14 +67,19 @@ Public Class Util
         Return u.UInt32
     End Function
 
-    Public Shared Async Function CreateDataArchive() As Task
+    Public Shared Async Function CreateDataArchive(updateData As Boolean) As Task
         '--create the working directory
         Dim workingDir As String = IO.Path.Combine(DIRECTORY_BASE, "working")
         If IO.Directory.Exists(workingDir) Then IO.Directory.Delete(workingDir, True)
         CreateDirectory(workingDir)
 
         '--generate all data
-        Await PkmnInfoFinderPokemonDB.CreateJSONFile()
+        If updateData Then
+            Await PkmnInfoFinderPokemonDB.CreateJSONFile()
+        Else
+            Debug.WriteLine("Skipping data file generation, copying from existing")
+            IO.File.Copy(IO.Path.Combine(DIRECTORY_BASE, "pkmn.json"), IO.Path.Combine(workingDir, "pkmn.json"), True)
+        End If
         Await PkmnImageFinderLocal.CreateJSONFileAndImageArchive(Environment.GetEnvironmentVariable("iconsDumpPath"), Environment.GetEnvironmentVariable("imagesDumpPath"))
         Await CreateTypeColorMap()
         Await CreateGameColorMap()
@@ -82,13 +87,14 @@ Public Class Util
         '--zip up the data and delete the working directory
         Debug.WriteLine("Starting zip file creation...")
         Dim zipPath As String = IO.Path.Combine(DIRECTORY_BASE, "data.zip")
+        If IO.File.Exists(zipPath) Then IO.File.Delete(zipPath)
         IO.Compression.ZipFile.CreateFromDirectory(workingDir, zipPath, IO.Compression.CompressionLevel.Optimal, False)
         IO.Directory.Delete(workingDir, True)
         Debug.WriteLine("Zip file created")
 
         '--produce the hash of the new data archive
         Dim hash As String = ProduceHashOfFile(zipPath)
-        Await IO.File.WriteAllTextAsync(IO.Path.Combine(DIRECTORY_BASE, "hash.txt"), hash)
+        Await IO.File.WriteAllTextAsync(IO.Path.Combine(DIRECTORY_BASE, "newhash.txt"), hash)
     End Function
 
     Private Shared Async Function CreateTypeColorMap() As Task

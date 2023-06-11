@@ -33,8 +33,6 @@ Public Class PkmnImageFinderLocal
 
         ' initialize the folder structure to build the image archive
         Dim workingDir As String = IO.Path.Combine(Util.DIRECTORY_BASE, "working")
-        If IO.Directory.Exists(workingDir) Then IO.Directory.Delete(workingDir, True)
-        Util.CreateDirectory(workingDir)
         Dim iconsWorkingDir = IO.Path.Combine(workingDir, "images", ICONS_DIRECTORY_NAME)
         Util.CreateDirectory(iconsWorkingDir)
         Dim imagesWorkingDir = IO.Path.Combine(workingDir, "images", IMAGES_DIRECTORY_NAME)
