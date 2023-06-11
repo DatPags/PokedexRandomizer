@@ -7,6 +7,9 @@ Imports Newtonsoft.Json
 Public Class Util
     Public Shared DIRECTORY_BASE As String = IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "mpagliaro98", "Pokedex Randomizer")
 
+    Public Const URL_HASH As String = "https://raw.githubusercontent.com/DatPags/PokedexRandomizer/master/hash.txt"
+    Public Const URL_DATA As String = "https://github.com/DatPags/PokedexRandomizer/raw/master/data.zip"
+
     Public Shared ReadOnly Property HttpClient As HttpClient = New HttpClient
 
     Private Shared _typeColorMap As IDictionary(Of String, Color)
@@ -159,10 +162,37 @@ Public Class Util
 
     Public Shared Async Function DownloadDataIfNotExists() As Task
         '--exit if data already exists (saved hash exists and matches hash of remote data)
+        Dim hashPath As String = IO.Path.Combine(DIRECTORY_BASE, "hash.txt")
+        If IO.File.Exists(hashPath) Then
+            Dim hash As String = Await IO.File.ReadAllTextAsync(hashPath)
+            Dim hashWeb As String = Await UtilWeb.GetTextFromUrlAsync(URL_HASH)
+            If hash = hashWeb Then
+                Debug.WriteLine("Hash matches - data is up to date")
+                Return
+            End If
+        End If
+
         '--download zip file
+        Debug.WriteLine("Downloading data archive...")
+        Dim bytes() = Await UtilWeb.GetBytesFromUrlAsync(URL_DATA)
+        Debug.WriteLine("Saving temporary data archive file...")
+        Dim zipPath As String = IO.Path.Combine(DIRECTORY_BASE, "tempdata.zip")
+        Await IO.File.WriteAllBytesAsync(zipPath, bytes)
+        Debug.WriteLine("Data archive downloaded successfully")
+
         '--extract it to the base directory
+        Debug.WriteLine("Extracting data...")
+        IO.Compression.ZipFile.ExtractToDirectory(zipPath, DIRECTORY_BASE, True)
+        Debug.WriteLine("Extraction successful")
+
         '--delete zip file
+        IO.File.Delete(zipPath)
+
         '--download and save the hash of the zip file
+        Debug.WriteLine("Updating hash value...")
+        Dim newHash As String = Await UtilWeb.GetTextFromUrlAsync(URL_HASH)
+        Await IO.File.WriteAllTextAsync(hashPath, newHash)
+        Debug.WriteLine("Hash value updated: " + newHash)
     End Function
 
     Public Shared Async Function LoadExtraData() As Task

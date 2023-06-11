@@ -26,4 +26,9 @@
         Debug.WriteLine("Getting text from URL: " + url)
         Return Await Util.HttpClient.GetStringAsync(url)
     End Function
+
+    Public Shared Async Function GetBytesFromUrlAsync(url As String) As Task(Of Byte())
+        Debug.WriteLine("Getting bytes from URL: " + url)
+        Return Await Util.HttpClient.GetByteArrayAsync(url)
+    End Function
 End Class
