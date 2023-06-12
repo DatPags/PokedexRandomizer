@@ -99,6 +99,7 @@ Public Class PkmnInfoFinderPokemonDB
         Return obj
     End Function
 
+#Region "Data Archive"
     Friend Shared Async Function CreateJSONFileAsync() As Task
         Debug.Write("Starting JSON file creation")
         Dim sw As New Stopwatch()
@@ -115,6 +116,7 @@ Public Class PkmnInfoFinderPokemonDB
         sw.Stop()
         Debug.WriteLine("Completed JSON file creation: " + sw.ElapsedMilliseconds.ToString + "ms, " + Encoding.UTF8.GetByteCount(json).ToString + " bytes")
     End Function
+#End Region
 
     Public Function GetTotalNumOfPkmn() As Integer Implements IPkmnInfoFinder.GetTotalNumOfPkmn
         Return _urlList.Count

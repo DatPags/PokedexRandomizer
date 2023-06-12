@@ -50,11 +50,11 @@ Public Class PkmnImageFinderLocal
         dict(0).Add(IMAGES_DIRECTORY_NAME, New List(Of String) From {"unknown.png"})
 
         ' icons
-        Dim tempDict = Await CreateImageArchiveAsync(iconsDumpPath, iconsWorkingDir, infoFinder)
+        Dim tempDict = Await CreateImageArchiveFromHOMEDumpAsync(iconsDumpPath, iconsWorkingDir, infoFinder)
         UpdateMainArchiveIndex(tempDict, dict, ICONS_DIRECTORY_NAME)
 
         ' images
-        tempDict = Await CreateImageArchiveAsync(imagesDumpPath, imagesWorkingDir, infoFinder)
+        tempDict = Await CreateImageArchiveFromHOMEDumpAsync(imagesDumpPath, imagesWorkingDir, infoFinder)
         UpdateMainArchiveIndex(tempDict, dict, IMAGES_DIRECTORY_NAME)
 
         Debug.WriteLine("Image archive creation completed")
@@ -64,7 +64,7 @@ Public Class PkmnImageFinderLocal
         Debug.WriteLine("Completed image JSON file creation: " + sw.ElapsedMilliseconds.ToString + "ms, " + Encoding.UTF8.GetByteCount(json).ToString + " bytes")
     End Function
 
-    Private Shared Async Function CreateImageArchiveAsync(dumpPath As String, workingDir As String, infoFinder As IPkmnInfoFinder) As Task(Of Dictionary(Of Integer, List(Of String)))
+    Private Shared Async Function CreateImageArchiveFromHOMEDumpAsync(dumpPath As String, workingDir As String, infoFinder As IPkmnInfoFinder) As Task(Of Dictionary(Of Integer, List(Of String)))
         Dim files = Directory.EnumerateFiles(dumpPath).ToList()
         Dim dict As New Dictionary(Of Integer, List(Of String))
         For pkmnNumber As Integer = 1 To infoFinder.GetTotalNumOfPkmn()
