@@ -63,7 +63,7 @@ Public Class FormMoveDisplay : Inherits Grid
         End Set
     End Property
 
-    Public Sub New(Optional image As SixLabors.ImageSharp.Image = Nothing, Optional formName As String = "",
+    Public Sub New(Optional image As BitmapImage = Nothing, Optional formName As String = "",
                    Optional ability As String = "", Optional randomMoves As List(Of MoveInfo) = Nothing)
         ' Initialize the base grid
         Me.ColumnDefinitions.Add(New ColumnDefinition With {.Width = New GridLength(1, GridUnitType.Star)})
@@ -92,7 +92,7 @@ Public Class FormMoveDisplay : Inherits Grid
             .Margin = New Thickness(5, 5, 5, 5)
         }
         RenderOptions.SetBitmapScalingMode(_image, BitmapScalingMode.HighQuality)
-        Me.PkmnImage = image.ToBitmapImage
+        Me.PkmnImage = image
 
         ' Create the text for this form
         _pkmnFormText = New TextBlock With {

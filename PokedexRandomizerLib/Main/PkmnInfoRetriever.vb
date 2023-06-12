@@ -24,7 +24,11 @@
 
         Dim pkmn As New Pkmn With {.pkmn = pkmnInfo.Value}
         pkmn.icons = Await ImageEngine.GetPkmnIconListAsync(pkmn.pkmn, settings, ImageCache)
+        pkmn.iconUris = New List(Of String)
+        If TypeOf ImageEngine Is IPkmnImageFinderURI Then pkmn.iconUris = DirectCast(ImageEngine, IPkmnImageFinderURI).GetPkmnIconURIList(pkmn.pkmn)
         pkmn.images = Await ImageEngine.GetPkmnImageListAsync(pkmn.pkmn, settings, ImageCache)
+        pkmn.imageUris = New List(Of String)
+        If TypeOf ImageEngine Is IPkmnImageFinderURI Then pkmn.imageUris = DirectCast(ImageEngine, IPkmnImageFinderURI).GetPkmnImageURIList(pkmn.pkmn)
         Return pkmn
     End Function
 

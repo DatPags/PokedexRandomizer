@@ -258,19 +258,19 @@ Class MainWindow
 
     Private Sub FillFormList(pkmn As Pkmn)
         For formIndex = 0 To pkmn.pkmn.forms.Count - 1
-            FormListBox.Items.Add(New FormDisplay(pkmn.images(formIndex), pkmn.pkmn.forms(formIndex)))
+            FormListBox.Items.Add(New FormDisplay(pkmn.GetImage(formIndex), pkmn.pkmn.forms(formIndex)))
         Next
     End Sub
 
     Private Sub FillMoveList(pkmn As Pkmn)
         For formIndex = 0 To pkmn.pkmn.moveForms.Count - 1
-            Dim im As SixLabors.ImageSharp.Image
+            Dim im As BitmapImage
             Dim abilityList As List(Of String)
             If pkmn.pkmn.forms.Contains(pkmn.pkmn.moveForms(formIndex)) Then
-                im = pkmn.icons(pkmn.pkmn.forms.IndexOf(pkmn.pkmn.moveForms(formIndex)))
+                im = pkmn.GetIcon(pkmn.pkmn.forms.IndexOf(pkmn.pkmn.moveForms(formIndex)))
                 abilityList = pkmn.pkmn.abilities(pkmn.pkmn.forms.IndexOf(pkmn.pkmn.moveForms(formIndex)))
             Else
-                im = pkmn.icons(0)
+                im = pkmn.GetIcon(0)
                 abilityList = pkmn.pkmn.abilities(0)
             End If
             Dim formName = pkmn.pkmn.moveForms(formIndex)

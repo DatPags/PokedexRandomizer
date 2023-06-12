@@ -5,7 +5,7 @@ Imports System.Text
 Imports System.Text.RegularExpressions
 
 Public Class PkmnImageFinderLocal
-    Implements IPkmnImageFinder
+    Implements IPkmnImageFinder, IPkmnImageFinderURI
 
     Private Shared DATA_FILE As String = IO.Path.Combine(Util.DIRECTORY_BASE, "imageindex.json")
     Private Shared IMAGES_DIRECTORY_BASE As String = IO.Path.Combine(Util.DIRECTORY_BASE, "images")
@@ -26,6 +26,7 @@ Public Class PkmnImageFinderLocal
         Return obj
     End Function
 
+#Region "Data Archive"
     Friend Shared Async Function CreateJSONFileAndImageArchiveAsync(iconsDumpPath As String, imagesDumpPath As String) As Task
         Debug.WriteLine("Starting image JSON file creation")
         Dim sw As New Stopwatch()
@@ -114,6 +115,7 @@ Public Class PkmnImageFinderLocal
             dict(pkmnNumber).Add(dirName, tempDict(pkmnNumber))
         Next
     End Sub
+#End Region
 
     Public Async Function GetPkmnIconListAsync(pkmnInfo As PkmnInfo, settings As Settings, cache As IImageCache) As Task(Of List(Of SixLabors.ImageSharp.Image)) Implements IPkmnImageFinder.GetPkmnIconListAsync
         Return Await GetPkmnImageListInternalAsync(pkmnInfo, settings, cache, ICONS_DIRECTORY_NAME)
@@ -123,7 +125,15 @@ Public Class PkmnImageFinderLocal
         Return Await GetPkmnImageListInternalAsync(pkmnInfo, settings, cache, IMAGES_DIRECTORY_NAME)
     End Function
 
-    Private Async Function GetPkmnImageListInternalAsync(pkmnInfo As PkmnInfo, settings As Settings, cache As IImageCache, directoryName As String) As Task(Of List(Of SixLabors.ImageSharp.Image))
+    Public Function GetPkmnIconURIList(pkmnInfo As PkmnInfo) As List(Of String) Implements IPkmnImageFinderURI.GetPkmnIconURIList
+        Return GetPkmnImageUrisInternal(pkmnInfo, ICONS_DIRECTORY_NAME)
+    End Function
+
+    Public Function GetPkmnImageURIList(pkmnInfo As PkmnInfo) As List(Of String) Implements IPkmnImageFinderURI.GetPkmnImageURIList
+        Return GetPkmnImageUrisInternal(pkmnInfo, IMAGES_DIRECTORY_NAME)
+    End Function
+
+    Private Function GetPkmnImageUrisInternal(pkmnInfo As PkmnInfo, directoryName As String) As List(Of String)
         Dim paths As New List(Of String)
         If index.ContainsKey(pkmnInfo.number) Then
             For idx As Integer = 0 To pkmnInfo.forms.Count - 1
@@ -138,10 +148,17 @@ Public Class PkmnImageFinderLocal
                 paths.Add(index(0)(directoryName)(0))
             Next
         End If
+        For idx As Integer = 0 To paths.Count - 1
+            paths(idx) = IO.Path.Combine(IMAGES_DIRECTORY_BASE, directoryName, paths(idx))
+        Next
+        Return paths
+    End Function
 
+    Private Async Function GetPkmnImageListInternalAsync(pkmnInfo As PkmnInfo, settings As Settings, cache As IImageCache, directoryName As String) As Task(Of List(Of SixLabors.ImageSharp.Image))
+        Dim paths = GetPkmnImageUrisInternal(pkmnInfo, directoryName)
         Dim images As New List(Of Image)
         For Each path In paths
-            images.Add(Await Image.LoadAsync(IO.Path.Combine(IMAGES_DIRECTORY_BASE, directoryName, path)))
+            images.Add(Await Image.LoadAsync(path))
         Next
         Return images
     End Function

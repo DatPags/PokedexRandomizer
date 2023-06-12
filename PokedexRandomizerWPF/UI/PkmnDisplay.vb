@@ -207,7 +207,7 @@ Public Class PkmnDisplay : Inherits Grid
     Private Sub FormChange(sender As Object, e As SelectionChangedEventArgs)
         Dim formIndex As Integer = _forms.SelectedIndex
         If formIndex >= 0 Then
-            _image.Source = _pkmnInfo.images(formIndex).ToBitmapImage
+            _image.Source = _pkmnInfo.GetImage(formIndex)
             _class.Text = _pkmnInfo.pkmn.species(formIndex)
             _type1.Text = _pkmnInfo.pkmn.types(formIndex)(0)
             _type1.Background = Util.GetPkmnTypeColor(_pkmnInfo.pkmn.types(formIndex)(0)).ToBrush

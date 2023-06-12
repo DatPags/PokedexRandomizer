@@ -3,7 +3,9 @@
 Public Structure Pkmn
     Public pkmn As PkmnInfo
     Public icons As List(Of Image)
+    Public iconUris As List(Of String)
     Public images As List(Of Image)
+    Public imageUris As List(Of String)
 End Structure
 
 <Serializable()>
