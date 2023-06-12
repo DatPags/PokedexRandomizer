@@ -64,10 +64,10 @@ Class MainWindow
         ' initialize the model
         _numPkmnLabel.Content = "Initializing..."
         'Await Util.CreateDataArchive(False) '--uncomment to update the data archive
-        Await Util.DownloadDataIfNotExists()
-        Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderLocal.CreateSelf() ' PkmnInfoFinderPokemonDB.CreateSelf()
-        Dim imageEngine As IPkmnImageFinder = Await PkmnImageFinderLocal.CreateSelf() ' Await PkmnImageFinderPokesprite.Create_Self()
-        Await Util.LoadExtraData()
+        Await Util.DownloadDataIfNotExistsAsync()
+        Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderLocal.CreateSelfAsync() ' PkmnInfoFinderPokemonDB.CreateSelf()
+        Dim imageEngine As IPkmnImageFinder = Await PkmnImageFinderLocal.CreateSelfAsync() ' Await PkmnImageFinderPokesprite.Create_Self()
+        Await Util.LoadExtraDataAsync()
         Dim cache As New AppDataLocalCache()
         _pkmnInfoRetriever = New PkmnInfoRetriever(infoEngine, imageEngine)
         _numPkmnLabel.Content = "Total number of Pokémon: " & _pkmnInfoRetriever.GetTotalNumOfPkmn().ToString

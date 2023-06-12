@@ -9,7 +9,7 @@ Public Class PkmnInfoFinderLocal
 
     Private data As Dictionary(Of Integer, PkmnInfo)
 
-    Public Shared Async Function CreateSelf() As Task(Of IPkmnInfoFinder)
+    Public Shared Async Function CreateSelfAsync() As Task(Of PkmnInfoFinderLocal)
         Dim obj As New PkmnInfoFinderLocal
         If Not IO.File.Exists(DATA_FILE) Then
             Throw New FileNotFoundException("Info data does not exist")

@@ -15,7 +15,7 @@ Public Class PkmnImageFinderLocal
 
     Private index As Dictionary(Of Integer, Dictionary(Of String, List(Of String)))
 
-    Public Shared Async Function CreateSelf() As Task(Of PkmnImageFinderLocal)
+    Public Shared Async Function CreateSelfAsync() As Task(Of PkmnImageFinderLocal)
         Dim obj = New PkmnImageFinderLocal
         If Not IO.File.Exists(DATA_FILE) Then
             Throw New FileNotFoundException("Image data does not exist")
@@ -26,7 +26,7 @@ Public Class PkmnImageFinderLocal
         Return obj
     End Function
 
-    Friend Shared Async Function CreateJSONFileAndImageArchive(iconsDumpPath As String, imagesDumpPath As String) As Task
+    Friend Shared Async Function CreateJSONFileAndImageArchiveAsync(iconsDumpPath As String, imagesDumpPath As String) As Task
         Debug.WriteLine("Starting image JSON file creation")
         Dim sw As New Stopwatch()
         sw.Start()
@@ -38,7 +38,7 @@ Public Class PkmnImageFinderLocal
         Dim imagesWorkingDir = IO.Path.Combine(workingDir, "images", IMAGES_DIRECTORY_NAME)
         Util.CreateDirectory(imagesWorkingDir)
         Dim dict As New Dictionary(Of Integer, Dictionary(Of String, List(Of String)))
-        Dim infoFinder = Await PkmnInfoFinderLocal.CreateSelf()
+        Dim infoFinder = Await PkmnInfoFinderLocal.CreateSelfAsync()
 
         ' download the default unknown image
         Dim img = Await UtilImage.GetImageFromUrlAsync(URL_IMG_UNKNOWN, Nothing, Nothing)
@@ -49,11 +49,11 @@ Public Class PkmnImageFinderLocal
         dict(0).Add(IMAGES_DIRECTORY_NAME, New List(Of String) From {"unknown.png"})
 
         ' icons
-        Dim tempDict = Await CreateImageArchive(iconsDumpPath, iconsWorkingDir, infoFinder)
+        Dim tempDict = Await CreateImageArchiveAsync(iconsDumpPath, iconsWorkingDir, infoFinder)
         UpdateMainArchiveIndex(tempDict, dict, ICONS_DIRECTORY_NAME)
 
         ' images
-        tempDict = Await CreateImageArchive(imagesDumpPath, imagesWorkingDir, infoFinder)
+        tempDict = Await CreateImageArchiveAsync(imagesDumpPath, imagesWorkingDir, infoFinder)
         UpdateMainArchiveIndex(tempDict, dict, IMAGES_DIRECTORY_NAME)
 
         Debug.WriteLine("Image archive creation completed")
@@ -63,7 +63,7 @@ Public Class PkmnImageFinderLocal
         Debug.WriteLine("Completed image JSON file creation: " + sw.ElapsedMilliseconds.ToString + "ms, " + Encoding.UTF8.GetByteCount(json).ToString + " bytes")
     End Function
 
-    Private Shared Async Function CreateImageArchive(dumpPath As String, workingDir As String, infoFinder As IPkmnInfoFinder) As Task(Of Dictionary(Of Integer, List(Of String)))
+    Private Shared Async Function CreateImageArchiveAsync(dumpPath As String, workingDir As String, infoFinder As IPkmnInfoFinder) As Task(Of Dictionary(Of Integer, List(Of String)))
         Dim files = Directory.EnumerateFiles(dumpPath).ToList()
         Dim dict As New Dictionary(Of Integer, List(Of String))
         For pkmnNumber As Integer = 1 To infoFinder.GetTotalNumOfPkmn()
