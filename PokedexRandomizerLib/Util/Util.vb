@@ -68,7 +68,7 @@ Public Class Util
     End Function
 
 #Region "Data Archive"
-    Public Shared Async Function CreateDataArchiveAsync(updateData As Boolean) As Task
+    Public Shared Async Function CreateDataArchiveAsync(settings As Settings, updateData As Boolean) As Task
         '--create the working directory
         Dim workingDir As String = IO.Path.Combine(DIRECTORY_BASE, "working")
         If IO.Directory.Exists(workingDir) Then IO.Directory.Delete(workingDir, True)
@@ -76,7 +76,7 @@ Public Class Util
 
         '--generate all data
         If updateData Then
-            Await PkmnInfoFinderPokemonDB.CreateJSONFileAsync()
+            Await PkmnInfoFinderPokemonDB.CreateJSONFileAsync(settings)
         Else
             Debug.WriteLine("Skipping data file generation, copying from existing")
             IO.File.Copy(IO.Path.Combine(DIRECTORY_BASE, "pkmn.json"), IO.Path.Combine(workingDir, "pkmn.json"), True)

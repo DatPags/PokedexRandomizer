@@ -1,32 +1,20 @@
 ﻿Public Class PkmnInfoRetriever
     Private InfoEngine As IPkmnInfoFinder
     Private ImageEngine As IPkmnImageFinder
-    Private InfoCache As IPkmnInfoCache
-    Private ImageCache As IImageCache
     Private _ran As New Random()
 
-    Public Sub New(infoEngine As IPkmnInfoFinder, imageEngine As IPkmnImageFinder, Optional infoCache As IPkmnInfoCache = Nothing,
-                   Optional imageCache As IImageCache = Nothing)
+    Public Sub New(infoEngine As IPkmnInfoFinder, imageEngine As IPkmnImageFinder)
         Me.InfoEngine = infoEngine
         Me.ImageEngine = imageEngine
-        Me.InfoCache = infoCache
-        Me.ImageCache = imageCache
     End Sub
 
     Public Async Function GetPkmnAsync(pkmnNumber As Integer, settings As Settings) As Task(Of Pkmn)
-        Dim pkmnInfo As PkmnInfo?
-        If InfoCache IsNot Nothing AndAlso settings.UseCache Then pkmnInfo = InfoCache.GetPkmnInfoIfExists(pkmnNumber.ToString) Else pkmnInfo = Nothing
-
-        If pkmnInfo Is Nothing Then
-            pkmnInfo = Await InfoEngine.GetPkmnInfoAsync(pkmnNumber)
-            If InfoCache IsNot Nothing AndAlso settings.UseCache Then InfoCache.StorePkmnInfoInCache(pkmnInfo.Value, pkmnNumber.ToString)
-        End If
-
-        Dim pkmn As New Pkmn With {.pkmn = pkmnInfo.Value}
-        pkmn.icons = Await ImageEngine.GetPkmnIconListAsync(pkmn.pkmn, settings, ImageCache)
+        Dim pkmnInfo As PkmnInfo = Await InfoEngine.GetPkmnInfoAsync(pkmnNumber)
+        Dim pkmn As New Pkmn With {.pkmn = pkmnInfo}
+        pkmn.icons = Await ImageEngine.GetPkmnIconListAsync(pkmn.pkmn)
         pkmn.iconUris = New List(Of String)
         If TypeOf ImageEngine Is IPkmnImageFinderURI Then pkmn.iconUris = DirectCast(ImageEngine, IPkmnImageFinderURI).GetPkmnIconURIList(pkmn.pkmn)
-        pkmn.images = Await ImageEngine.GetPkmnImageListAsync(pkmn.pkmn, settings, ImageCache)
+        pkmn.images = Await ImageEngine.GetPkmnImageListAsync(pkmn.pkmn)
         pkmn.imageUris = New List(Of String)
         If TypeOf ImageEngine Is IPkmnImageFinderURI Then pkmn.imageUris = DirectCast(ImageEngine, IPkmnImageFinderURI).GetPkmnImageURIList(pkmn.pkmn)
         Return pkmn
@@ -55,16 +43,6 @@
             End If
             Return True
         End If
-    End Function
-
-    Public Function ClearCache() As Boolean
-        If InfoCache IsNot Nothing Then
-            If Not InfoCache.ClearCache() Then Return False
-        End If
-        If ImageCache IsNot Nothing Then
-            If Not ImageCache.ClearCache() Then Return False
-        End If
-        Return True
     End Function
 
     Public Function SelectRandomEntry(pkmn As Pkmn, settings As Settings) As List(Of Integer)

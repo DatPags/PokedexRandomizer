@@ -10,6 +10,9 @@ Public Class PkmnInfoFinderPokemonDB
     Private _urlList As List(Of UrlInfo)
     Private _urlNameMap As Dictionary(Of String, UrlInfo)
 
+    Private _settings As Settings
+    Private _cache As IPkmnInfoCache
+
 #Region "Structs"
     Private Structure UrlInfo
         Public name As String
@@ -92,19 +95,24 @@ Public Class PkmnInfoFinderPokemonDB
     End Structure
 #End Region
 
-    Public Shared Async Function CreateSelfAsync() As Task(Of PkmnInfoFinderPokemonDB)
-        Dim obj = New PkmnInfoFinderPokemonDB
+    Public Shared Async Function CreateSelfAsync(settings As Settings, Optional cache As IPkmnInfoCache = Nothing) As Task(Of PkmnInfoFinderPokemonDB)
+        Dim obj = New PkmnInfoFinderPokemonDB(settings, cache)
         obj._urlList = Await obj.GetUrlListAsync()
         obj.BuildNameMap()
         Return obj
     End Function
 
+    Public Sub New(settings As Settings, cache As IPkmnInfoCache)
+        _settings = settings
+        _cache = cache
+    End Sub
+
 #Region "Data Archive"
-    Friend Shared Async Function CreateJSONFileAsync() As Task
+    Friend Shared Async Function CreateJSONFileAsync(settings As Settings) As Task
         Debug.Write("Starting JSON file creation")
         Dim sw As New Stopwatch()
         sw.Start()
-        Dim obj = Await CreateSelfAsync()
+        Dim obj = Await CreateSelfAsync(settings)
         Dim dict As New Dictionary(Of Integer, PkmnInfo)
         For idx As Integer = 1 To obj.GetTotalNumOfPkmn()
             dict.Add(idx, Await obj.GetPkmnInfoAsync(idx))
@@ -135,6 +143,10 @@ Public Class PkmnInfoFinderPokemonDB
     End Function
 
     Public Async Function GetPkmnInfoAsync(pkmnNumber As Integer) As Task(Of PkmnInfo) Implements IPkmnInfoFinder.GetPkmnInfoAsync
+        Dim cachedInfo As PkmnInfo?
+        If _cache IsNot Nothing AndAlso _settings.UseCache Then cachedInfo = _cache.GetPkmnInfoIfExists(pkmnNumber.ToString) Else cachedInfo = Nothing
+        If cachedInfo IsNot Nothing Then Return cachedInfo.Value
+
         Dim url As String = _urlList(pkmnNumber - 1).url
 
         Dim html = Await UtilWeb.GetHtmlAsync(URL_BASE & url)
@@ -149,6 +161,8 @@ Public Class PkmnInfoFinderPokemonDB
         CondenseMoveLists(moveData)
         pkmnInfo.moveForms = moveData.forms
         pkmnInfo.moves = moveData.moves
+
+        If _cache IsNot Nothing AndAlso _settings.UseCache Then _cache.StorePkmnInfoInCache(pkmnInfo, pkmnNumber.ToString)
 
         Return pkmnInfo
     End Function

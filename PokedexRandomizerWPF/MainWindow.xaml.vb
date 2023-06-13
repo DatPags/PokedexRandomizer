@@ -8,6 +8,7 @@ Class MainWindow
 
     Private _pkmnInfoRetriever As PkmnInfoRetriever
     Private _settings As Settings
+    Private _cache As AppDataLocalCache
 
     Private _ran As Random = New Random
     Private _displays(TOTAL_INFO) As PkmnDisplay
@@ -63,15 +64,15 @@ Class MainWindow
 
         ' initialize the model
         _numPkmnLabel.Content = "Initializing..."
-        'Await Util.CreateDataArchive(False) '--uncomment to update the data archive
+        'Await Util.CreateDataArchive(_settings, False) '--uncomment to update the data archive
         Await Util.DownloadDataIfNotExistsAsync()
-        Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderLocal.CreateSelfAsync() ' PkmnInfoFinderPokemonDB.CreateSelf()
-        Dim imageEngine As IPkmnImageFinder = Await PkmnImageFinderLocal.CreateSelfAsync() ' Await PkmnImageFinderPokesprite.Create_Self()
+        _cache = New AppDataLocalCache()
+        Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderLocal.CreateSelfAsync() ' PkmnInfoFinderPokemonDB.CreateSelfAsync(_settings, cache:=cache)
+        Dim imageEngine As IPkmnImageFinder = Await PkmnImageFinderLocal.CreateSelfAsync() ' PkmnImageFinderPokesprite.CreateSelfAsync(cache:=cache)
         Await Util.LoadExtraDataAsync()
-        Dim cache As New AppDataLocalCache()
         _pkmnInfoRetriever = New PkmnInfoRetriever(infoEngine, imageEngine)
         _numPkmnLabel.Content = "Total number of Pokémon: " & _pkmnInfoRetriever.GetTotalNumOfPkmn().ToString
-        MoveDisplay.LoadMoveCategoryImagesAsync(_settings, cache)
+        MoveDisplay.LoadMoveCategoryImagesAsync(_settings, _cache)
 
         RandomizeButton.IsEnabled = True
         MovesButton.IsEnabled = True
@@ -222,7 +223,8 @@ Class MainWindow
     End Sub
 
     Private Sub MenuCacheClear_Click(sender As Object, e As RoutedEventArgs) Handles MenuCacheClear.Click
-        Dim result As Boolean = _pkmnInfoRetriever.ClearCache()
+        Dim result As Boolean = _cache.IPkmnInfoCache_ClearCache()
+        result = result And _cache.IImageCache_ClearCache()
         MessageBox.Show(If(result, "Successfully cleared cache", "Something went wrong when trying to clear cache. Please try again later"), "Clear Cache", MessageBoxButton.OK)
     End Sub
 #End Region
