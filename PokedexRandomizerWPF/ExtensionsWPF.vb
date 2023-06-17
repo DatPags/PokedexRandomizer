@@ -47,7 +47,7 @@ Module ExtensionsWPF
     End Function
 
     <Extension()>
-    Public Function GetIcon(pkmn As Pkmn, formIndex As Integer) As BitmapImage
+    Public Function GetIcon(pkmn As PkmnInfo, formIndex As Integer) As BitmapImage
         If formIndex < pkmn.iconUris.Count Then
             Dim newImg As New BitmapImage
             newImg.BeginInit()
@@ -60,7 +60,7 @@ Module ExtensionsWPF
     End Function
 
     <Extension()>
-    Public Function GetImage(pkmn As Pkmn, formIndex As Integer) As BitmapImage
+    Public Function GetImage(pkmn As PkmnInfo, formIndex As Integer) As BitmapImage
         If formIndex < pkmn.imageUris.Count Then
             Dim newImg As New BitmapImage
             newImg.BeginInit()

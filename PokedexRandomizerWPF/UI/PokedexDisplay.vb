@@ -11,13 +11,13 @@ Public Class PokedexDisplay
         End Get
     End Property
 
-    Public Sub New(pkmn As Pkmn, useImages As Boolean)
-        _pkmnNumber = pkmn.pkmn.number
+    Public Sub New(pkmn As PkmnInfo, useImages As Boolean)
+        _pkmnNumber = pkmn.number
 
         Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(1, GridUnitType.Star)})
         Me.Height = 80
         Me.Width = 80
-        Me.ToolTip = "#" + pkmn.pkmn.number.ToString("D4") + ": " + pkmn.pkmn.name
+        Me.ToolTip = "#" + pkmn.number.ToString("D4") + ": " + pkmn.name
 
         Dim border As New Border With {
             .BorderThickness = New Thickness(2),
@@ -38,7 +38,7 @@ Public Class PokedexDisplay
                 .TextAlignment = TextAlignment.Center,
                 .HorizontalAlignment = HorizontalAlignment.Center,
                 .VerticalAlignment = VerticalAlignment.Center,
-                .Text = "#" + pkmn.pkmn.number.ToString("D4") + vbCrLf + pkmn.pkmn.name
+                .Text = "#" + pkmn.number.ToString("D4") + vbCrLf + pkmn.name
             }
         End If
 

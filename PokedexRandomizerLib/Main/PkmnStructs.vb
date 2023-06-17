@@ -1,13 +1,5 @@
 ﻿Imports SixLabors.ImageSharp
 
-Public Structure Pkmn
-    Public pkmn As PkmnInfo
-    Public icons As List(Of Image)
-    Public iconUris As List(Of String)
-    Public images As List(Of Image)
-    Public imageUris As List(Of String)
-End Structure
-
 <Serializable()>
 Public Structure PkmnInfo
     Public number As Integer
@@ -22,6 +14,10 @@ Public Structure PkmnInfo
     Public moveForms As List(Of String)
     Public moves As List(Of List(Of MoveInfo))
     Public abilities As List(Of List(Of String))
+    <NonSerialized()> Public icons As List(Of Image)
+    <NonSerialized()> Public iconUris As List(Of String)
+    <NonSerialized()> Public images As List(Of Image)
+    <NonSerialized()> Public imageUris As List(Of String)
 End Structure
 
 <Serializable()>
