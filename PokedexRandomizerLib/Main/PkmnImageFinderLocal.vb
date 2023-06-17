@@ -20,6 +20,12 @@ Public Class PkmnImageFinderLocal
 
     Private index As Dictionary(Of Integer, Dictionary(Of String, List(Of String)))
 
+    Public ReadOnly Property SupportsRapidLookup As Boolean Implements IPkmnImageFinder.SupportsRapidLookup
+        Get
+            Return True
+        End Get
+    End Property
+
     Public Shared Async Function CreateSelfAsync() As Task(Of PkmnImageFinderLocal)
         Dim obj = New PkmnImageFinderLocal
         If Not IO.File.Exists(DATA_FILE) Then

@@ -135,6 +135,30 @@
                     </Grid>
                 </DockPanel>
             </TabItem>
+            <TabItem x:Name="TabPokedex" Header="Pokedex" IsEnabled="False">
+                <DockPanel>
+                    <Grid x:Name="PokedexTop" DockPanel.Dock="Top" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width='1*' />
+                            <ColumnDefinition Width='1*' />
+                            <ColumnDefinition Width='1*' />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5" Grid.Column="1">
+                            <TextBox Margin="10,0,5,0" MaxLength="20" MinWidth="150" TextAlignment="Center" FontSize="16" VerticalAlignment="Center" MaxWidth="150" Visibility="Hidden" />
+                            <Button Content="Get Pokemon Info" Margin="5,0,10,0" IsEnabled="False" FontSize="16" Padding="10,5" Visibility="Hidden" />
+                        </StackPanel>
+                    </Grid>
+                    <Border x:Name="HeightHelperP" DockPanel.Dock="Bottom" Margin="5">
+                        <ListBox x:Name="DexListBox" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Height="{Binding Path=ActualHeight, ElementName=HeightHelperP}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" KeyDown="DexListBox_KeyDown">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                        </ListBox>
+                    </Border>
+                </DockPanel>
+            </TabItem>
         </TabControl>
     </DockPanel>
 </Window>

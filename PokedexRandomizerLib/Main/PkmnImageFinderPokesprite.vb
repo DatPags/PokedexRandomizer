@@ -18,6 +18,12 @@ Public Class PkmnImageFinderPokesprite
     Private _settings As Settings
     Private _cache As IImageCache
 
+    Public ReadOnly Property SupportsRapidLookup As Boolean Implements IPkmnImageFinder.SupportsRapidLookup
+        Get
+            Return False
+        End Get
+    End Property
+
     Public Shared Async Function CreateSelfAsync(settings As Settings, Optional cache As IImageCache = Nothing) As Task(Of PkmnImageFinderPokesprite)
         Dim obj = New PkmnImageFinderPokesprite(settings, cache)
         Dim text = Await UtilWeb.GetTextFromUrlAsync(URL_IMG_JSON)
