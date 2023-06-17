@@ -15,7 +15,7 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_5F810DE0965847D88B99F65A834CDF2B"
+        "MsmKey" = "8:_3254EB473363482193A2D7C2FA5AEF66"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -116,7 +116,7 @@
         }
         "File"
         {
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5F810DE0965847D88B99F65A834CDF2B"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_3254EB473363482193A2D7C2FA5AEF66"
             {
             "SourcePath" = "8:..\\PokedexRandomizerWPF\\icon.ico"
             "TargetName" = "8:icon.ico"
@@ -204,7 +204,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Pokedex Randomizer"
         "ProductCode" = "8:{BBF7D37E-C735-4C63-B5E2-EED4E6B1E278}"
-        "PackageCode" = "8:{B9DB747D-77AA-4D17-B755-0D3C29B404C2}"
+        "PackageCode" = "8:{BA1C258F-9F99-47EE-BE4E-75906A29D1AA}"
         "UpgradeCode" = "8:{F7FB5634-44FF-4BD0-A78A-D6DF8AE5E217}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
@@ -335,7 +335,7 @@
             "Target" = "8:_EA8F1BFAD3DA411E995EF6944EB32424"
             "Folder" = "8:_4453CCA8DA5B4BC384FB00A7B8F06004"
             "WorkingFolder" = "8:_9891BB1E8E7C46B89DF843B17325D2F2"
-            "Icon" = "8:_5F810DE0965847D88B99F65A834CDF2B"
+            "Icon" = "8:_3254EB473363482193A2D7C2FA5AEF66"
             "Feature" = "8:"
             }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_8572FA4C79334D0CB7046E230FA783D3"
@@ -349,7 +349,7 @@
             "Target" = "8:_EA8F1BFAD3DA411E995EF6944EB32424"
             "Folder" = "8:_CFDC319BCCFC49F2B142702D6EE9CFC7"
             "WorkingFolder" = "8:_9891BB1E8E7C46B89DF843B17325D2F2"
-            "Icon" = "8:"
+            "Icon" = "8:_3254EB473363482193A2D7C2FA5AEF66"
             "Feature" = "8:"
             }
         }
