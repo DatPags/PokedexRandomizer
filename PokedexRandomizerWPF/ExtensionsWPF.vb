@@ -1,12 +1,10 @@
 ﻿Imports System.IO
 Imports System.Runtime.CompilerServices
-Imports System.Windows.Shell
 Imports PokedexRandomizerLib
 Imports SixLabors.ImageSharp
 
 Module ExtensionsWPF
-    Private TEMP_DIRECTORY_BASE As String = IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "mpagliaro98", "Pokedex Randomizer")
-    Private TEMP_DIRECTORY As String = IO.Path.Combine(TEMP_DIRECTORY_BASE, "temp")
+    Private TEMP_DIRECTORY As String = IO.Path.Combine(Util.DIRECTORY_BASE, "temp")
 
     <Extension()>
     Public Function ToMediaColor(fromColor As System.Drawing.Color) As System.Windows.Media.Color

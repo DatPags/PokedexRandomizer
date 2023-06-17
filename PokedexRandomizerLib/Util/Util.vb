@@ -5,7 +5,7 @@ Imports System.Net.Http
 Imports Newtonsoft.Json
 
 Public Class Util
-    Public Shared DIRECTORY_BASE As String = IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "mpagliaro98", "Pokedex Randomizer")
+    Public Shared DIRECTORY_BASE As String = IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DatPags", "Pokedex Randomizer")
 
     Public Const URL_HASH As String = "https://raw.githubusercontent.com/DatPags/PokedexRandomizer/master/hash.txt"
     Public Const URL_DATA As String = "https://github.com/DatPags/PokedexRandomizer/raw/master/data.zip"
@@ -169,6 +169,7 @@ Public Class Util
 
     Public Shared Async Function DownloadDataIfNotExistsAsync() As Task
         '--exit if data already exists (saved hash exists and matches hash of remote data)
+        CreateDirectory(DIRECTORY_BASE)
         Dim hashPath As String = IO.Path.Combine(DIRECTORY_BASE, "hash.txt")
         If IO.File.Exists(hashPath) Then
             Dim hash As String = Await IO.File.ReadAllTextAsync(hashPath)

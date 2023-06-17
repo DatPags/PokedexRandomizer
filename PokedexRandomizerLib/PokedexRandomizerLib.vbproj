@@ -3,6 +3,7 @@
   <PropertyGroup>
     <RootNamespace>PokedexRandomizerLib</RootNamespace>
     <TargetFramework>net7.0</TargetFramework>
+    <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>

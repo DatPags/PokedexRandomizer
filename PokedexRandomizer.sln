@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PokedexRandomizerLib", "PokedexRandomizerLib\PokedexRandomizerLib.vbproj", "{5EAE870E-B583-46DB-8175-E68C17CFED50}"
+Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "PokedexRandomizerLib", "PokedexRandomizerLib\PokedexRandomizerLib.vbproj", "{5EAE870E-B583-46DB-8175-E68C17CFED50}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PokedexRandomizerWPF", "PokedexRandomizerWPF\PokedexRandomizerWPF.vbproj", "{08B6F0F9-3A85-4278-96CE-30BD7F967146}"
+Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "PokedexRandomizerWPF", "PokedexRandomizerWPF\PokedexRandomizerWPF.vbproj", "{08B6F0F9-3A85-4278-96CE-30BD7F967146}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PokedexRandomizerInstaller", "PokedexRandomizerInstaller\PokedexRandomizerInstaller.vdproj", "{FD49D012-2290-4AFC-B959-3FB1E2A203C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,8 @@ Global
 		{08B6F0F9-3A85-4278-96CE-30BD7F967146}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08B6F0F9-3A85-4278-96CE-30BD7F967146}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08B6F0F9-3A85-4278-96CE-30BD7F967146}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD49D012-2290-4AFC-B959-3FB1E2A203C2}.Debug|Any CPU.ActiveCfg = Debug
+		{FD49D012-2290-4AFC-B959-3FB1E2A203C2}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
