@@ -167,7 +167,7 @@ Public Class Util
         Await IO.File.WriteAllTextAsync(IO.Path.Combine(DIRECTORY_BASE, "working", "gamecolormap.json"), json)
     End Function
 
-    Public Shared Async Function DownloadDataIfNotExistsAsync() As Task
+    Public Shared Async Function DownloadDataIfNotExistsAsync(Optional pi As IProgress(Of String) = Nothing) As Task
         '--exit if data already exists (saved hash exists and matches hash of remote data)
         CreateDirectory(DIRECTORY_BASE)
         Dim hashPath As String = IO.Path.Combine(DIRECTORY_BASE, "hash.txt")
@@ -182,8 +182,9 @@ Public Class Util
 
         '--download zip file
         Debug.WriteLine("Downloading data archive...")
-        Dim bytes() = Await UtilWeb.GetBytesFromUrlAsync(URL_DATA)
+        Dim bytes() = Await UtilWeb.GetBytesFromUrlAsync(URL_DATA, pi)
         Debug.WriteLine("Saving temporary data archive file...")
+        If pi IsNot Nothing Then pi.Report("Extracting data...")
         Dim zipPath As String = IO.Path.Combine(DIRECTORY_BASE, "tempdata.zip")
         Await IO.File.WriteAllBytesAsync(zipPath, bytes)
         Debug.WriteLine("Data archive downloaded successfully")

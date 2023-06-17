@@ -66,7 +66,10 @@ Class MainWindow
         ' initialize the model
         _numPkmnLabel.Content = "Initializing..."
         'Await Util.CreateDataArchiveAsync(_settings, False) '--uncomment to update the data archive
-        Await Util.DownloadDataIfNotExistsAsync()
+        Await Util.DownloadDataIfNotExistsAsync(New Progress(Of String)(Sub(prog)
+                                                                            _numPkmnLabel.Content = prog
+                                                                        End Sub))
+        _numPkmnLabel.Content = "Initializing..."
         _cache = New AppDataLocalCache()
         Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderLocal.CreateSelfAsync() ' PkmnInfoFinderPokemonDB.CreateSelfAsync(_settings, cache:=cache)
         Dim imageEngine As IPkmnImageFinder = Await PkmnImageFinderLocal.CreateSelfAsync() ' PkmnImageFinderPokesprite.CreateSelfAsync(cache:=cache)
