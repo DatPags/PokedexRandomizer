@@ -64,15 +64,15 @@ Class MainWindow
 
         ' initialize the model
         _numPkmnLabel.Content = "Initializing..."
-        'Await Util.CreateDataArchive(_settings, False) '--uncomment to update the data archive
+        'Await Util.CreateDataArchiveAsync(_settings, False) '--uncomment to update the data archive
         Await Util.DownloadDataIfNotExistsAsync()
         _cache = New AppDataLocalCache()
         Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderLocal.CreateSelfAsync() ' PkmnInfoFinderPokemonDB.CreateSelfAsync(_settings, cache:=cache)
         Dim imageEngine As IPkmnImageFinder = Await PkmnImageFinderLocal.CreateSelfAsync() ' PkmnImageFinderPokesprite.CreateSelfAsync(cache:=cache)
         Await Util.LoadExtraDataAsync()
         _pkmnInfoRetriever = New PkmnInfoRetriever(infoEngine, imageEngine)
+        Await _pkmnInfoRetriever.LoadMoveCategoryImagesAsync()
         _numPkmnLabel.Content = "Total number of Pokémon: " & _pkmnInfoRetriever.GetTotalNumOfPkmn().ToString
-        MoveDisplay.LoadMoveCategoryImagesAsync(_settings, _cache)
 
         RandomizeButton.IsEnabled = True
         MovesButton.IsEnabled = True
@@ -278,7 +278,7 @@ Class MainWindow
             Dim formName = pkmn.pkmn.moveForms(formIndex)
             Dim randomMoves = _pkmnInfoRetriever.PickRandomMoves(pkmn.pkmn.moves(formIndex))
             Dim ability = abilityList(_ran.Next(abilityList.Count))
-            Dim formMoves = New FormMoveDisplay(im, formName, ability, randomMoves)
+            Dim formMoves = New FormMoveDisplay(im, formName, ability, randomMoves, _pkmnInfoRetriever)
 
             ' Color this grid depending on which row it is on
             If formIndex Mod 2 = 0 Then

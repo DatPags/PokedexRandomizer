@@ -2,10 +2,12 @@
     Private InfoEngine As IPkmnInfoFinder
     Private ImageEngine As IPkmnImageFinder
     Private _ran As New Random()
+    Private _moveCategories As Dictionary(Of String, Tuple(Of String, SixLabors.ImageSharp.Image))
 
     Public Sub New(infoEngine As IPkmnInfoFinder, imageEngine As IPkmnImageFinder)
         Me.InfoEngine = infoEngine
         Me.ImageEngine = imageEngine
+        _moveCategories = New Dictionary(Of String, Tuple(Of String, SixLabors.ImageSharp.Image))
     End Sub
 
     Public Async Function GetPkmnAsync(pkmnNumber As Integer, settings As Settings) As Task(Of Pkmn)
@@ -150,5 +152,42 @@
             Loop
             Return randomMoves
         End If
+    End Function
+
+    Public Async Function LoadMoveCategoryImagesAsync() As Task
+        Dim dict As New Dictionary(Of String, Tuple(Of String, SixLabors.ImageSharp.Image)) From {
+            {"physical", Await LoadMoveCategoryImageAsync("physical")},
+            {"special", Await LoadMoveCategoryImageAsync("special")},
+            {"status", Await LoadMoveCategoryImageAsync("status")}
+        }
+        _moveCategories = dict
+    End Function
+
+    Private Async Function LoadMoveCategoryImageAsync(category As String) As Task(Of Tuple(Of String, SixLabors.ImageSharp.Image))
+        Dim uri As String = GetMoveCategoryURI(category)
+        Dim image As SixLabors.ImageSharp.Image = Await GetMoveCategoryImageAsync(category.ToLower)
+        Return Tuple.Create(uri, image)
+    End Function
+
+    Private Function GetMoveCategoryURI(category As String) As String
+        If TypeOf ImageEngine Is IPkmnImageFinderURI Then
+            Return DirectCast(ImageEngine, IPkmnImageFinderURI).GetMoveCategoryURI(category)
+        Else
+            Return Nothing
+        End If
+    End Function
+
+    Public Async Function GetMoveCategoryImageAsync(category As String) As Task(Of SixLabors.ImageSharp.Image)
+        Return Await ImageEngine.GetMoveCategoryImageAsync(category)
+    End Function
+
+    Public Function FetchMoveCategoryURI(category As String) As String
+        If Not _moveCategories.ContainsKey(category.ToLower) Then Return Nothing
+        Return _moveCategories(category.ToLower).Item1
+    End Function
+
+    Public Function FetchMoveCategoryImage(category As String) As SixLabors.ImageSharp.Image
+        If Not _moveCategories.ContainsKey(category.ToLower) Then Return Nothing
+        Return _moveCategories(category.ToLower).Item2
     End Function
 End Class

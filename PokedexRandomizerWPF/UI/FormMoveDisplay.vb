@@ -12,6 +12,7 @@ Public Class FormMoveDisplay : Inherits Grid
     Private _moveDisplayList As List(Of MoveDisplay)
     Private _pkmnAbility As String
     Private _pkmnAbilityText As TextBlock
+    Private _infoRetriever As PkmnInfoRetriever
 
     Public Property BackgroundColor() As String
         Get
@@ -64,7 +65,9 @@ Public Class FormMoveDisplay : Inherits Grid
     End Property
 
     Public Sub New(Optional image As BitmapImage = Nothing, Optional formName As String = "",
-                   Optional ability As String = "", Optional randomMoves As List(Of MoveInfo) = Nothing)
+                   Optional ability As String = "", Optional randomMoves As List(Of MoveInfo) = Nothing, Optional infoRetriever As PkmnInfoRetriever = Nothing)
+        _infoRetriever = infoRetriever
+
         ' Initialize the base grid
         Me.ColumnDefinitions.Add(New ColumnDefinition With {.Width = New GridLength(1, GridUnitType.Star)})
         Me.ColumnDefinitions.Add(New ColumnDefinition With {.Width = New GridLength(4, GridUnitType.Star)})
@@ -135,7 +138,7 @@ Public Class FormMoveDisplay : Inherits Grid
         Dim currentRow = 0
         Dim currentCol = 1
         For Each move In _moveList
-            Dim moveDisplay = New MoveDisplay(move)
+            Dim moveDisplay = New MoveDisplay(move, _infoRetriever)
             If currentRow = 0 Then
                 moveDisplay.VerticalAlignment = VerticalAlignment.Bottom
             Else
