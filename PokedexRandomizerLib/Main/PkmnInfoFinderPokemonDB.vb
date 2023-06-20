@@ -92,18 +92,18 @@ Public Class PkmnInfoFinderPokemonDB
     End Structure
 #End Region
 
-    Public Shared Async Function CreateSelf() As Task(Of IPkmnInfoFinder)
+    Public Shared Async Function CreateSelfAsync() As Task(Of PkmnInfoFinderPokemonDB)
         Dim obj = New PkmnInfoFinderPokemonDB
         obj._urlList = Await obj.GetUrlListAsync()
         obj.BuildNameMap()
         Return obj
     End Function
 
-    Friend Shared Async Function CreateJSONFile() As Task
+    Friend Shared Async Function CreateJSONFileAsync() As Task
         Debug.Write("Starting JSON file creation")
         Dim sw As New Stopwatch()
         sw.Start()
-        Dim obj = Await CreateSelf()
+        Dim obj = Await CreateSelfAsync()
         Dim dict As New Dictionary(Of Integer, PkmnInfo)
         For idx As Integer = 1 To obj.GetTotalNumOfPkmn()
             dict.Add(idx, Await obj.GetPkmnInfoAsync(idx))

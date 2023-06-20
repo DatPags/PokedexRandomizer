@@ -67,7 +67,8 @@ Public Class Util
         Return u.UInt32
     End Function
 
-    Public Shared Async Function CreateDataArchive(updateData As Boolean) As Task
+#Region "Data Archive"
+    Public Shared Async Function CreateDataArchiveAsync(updateData As Boolean) As Task
         '--create the working directory
         Dim workingDir As String = IO.Path.Combine(DIRECTORY_BASE, "working")
         If IO.Directory.Exists(workingDir) Then IO.Directory.Delete(workingDir, True)
@@ -75,14 +76,14 @@ Public Class Util
 
         '--generate all data
         If updateData Then
-            Await PkmnInfoFinderPokemonDB.CreateJSONFile()
+            Await PkmnInfoFinderPokemonDB.CreateJSONFileAsync()
         Else
             Debug.WriteLine("Skipping data file generation, copying from existing")
             IO.File.Copy(IO.Path.Combine(DIRECTORY_BASE, "pkmn.json"), IO.Path.Combine(workingDir, "pkmn.json"), True)
         End If
-        Await PkmnImageFinderLocal.CreateJSONFileAndImageArchive(Environment.GetEnvironmentVariable("iconsDumpPath"), Environment.GetEnvironmentVariable("imagesDumpPath"))
-        Await CreateTypeColorMap()
-        Await CreateGameColorMap()
+        Await PkmnImageFinderLocal.CreateJSONFileAndImageArchiveAsync(Environment.GetEnvironmentVariable("iconsDumpPath"), Environment.GetEnvironmentVariable("imagesDumpPath"))
+        Await CreateTypeColorMapAsync()
+        Await CreateGameColorMapAsync()
 
         '--zip up the data and delete the working directory
         Debug.WriteLine("Starting zip file creation...")
@@ -97,7 +98,7 @@ Public Class Util
         Await IO.File.WriteAllTextAsync(IO.Path.Combine(DIRECTORY_BASE, "newhash.txt"), hash)
     End Function
 
-    Private Shared Async Function CreateTypeColorMap() As Task
+    Private Shared Async Function CreateTypeColorMapAsync() As Task
         Dim typeColorMap As New Dictionary(Of String, Color) From {
             {"Normal", Color.FromArgb(&HFFAAAA99)},
             {"Bug", Color.FromArgb(&HFFAABB22)},
@@ -122,7 +123,7 @@ Public Class Util
         Await IO.File.WriteAllTextAsync(IO.Path.Combine(DIRECTORY_BASE, "working", "typecolormap.json"), json)
     End Function
 
-    Private Shared Async Function CreateGameColorMap() As Task
+    Private Shared Async Function CreateGameColorMapAsync() As Task
         Dim gameColorMap As New Dictionary(Of String, Color) From {
             {"Red", Color.FromArgb(&HFFC03028)},
             {"Blue", Color.FromArgb(&HFF5D81D6)},
@@ -166,7 +167,7 @@ Public Class Util
         Await IO.File.WriteAllTextAsync(IO.Path.Combine(DIRECTORY_BASE, "working", "gamecolormap.json"), json)
     End Function
 
-    Public Shared Async Function DownloadDataIfNotExists() As Task
+    Public Shared Async Function DownloadDataIfNotExistsAsync() As Task
         '--exit if data already exists (saved hash exists and matches hash of remote data)
         Dim hashPath As String = IO.Path.Combine(DIRECTORY_BASE, "hash.txt")
         If IO.File.Exists(hashPath) Then
@@ -201,13 +202,14 @@ Public Class Util
         Debug.WriteLine("Hash value updated: " + newHash)
     End Function
 
-    Public Shared Async Function LoadExtraData() As Task
+    Public Shared Async Function LoadExtraDataAsync() As Task
         Dim json = Await IO.File.ReadAllTextAsync(IO.Path.Combine(DIRECTORY_BASE, "typecolormap.json"))
         _typeColorMap = JsonConvert.DeserializeObject(Of Dictionary(Of String, Color))(json)
 
         json = Await IO.File.ReadAllTextAsync(IO.Path.Combine(DIRECTORY_BASE, "gamecolormap.json"))
         _gameColorMap = JsonConvert.DeserializeObject(Of Dictionary(Of String, Color))(json)
     End Function
+#End Region
 
     Public Shared Function ProduceHashOfFile(file_name As String) As String
         Dim hash = System.Security.Cryptography.MD5.Create()

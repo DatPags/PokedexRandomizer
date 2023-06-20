@@ -11,7 +11,7 @@ Public Class PkmnImageFinderPokesprite
 
     Private _imageJson As Newtonsoft.Json.Linq.JObject
 
-    Public Shared Async Function Create_Self() As Task(Of PkmnImageFinderPokesprite)
+    Public Shared Async Function CreateSelfAsync() As Task(Of PkmnImageFinderPokesprite)
         Dim obj = New PkmnImageFinderPokesprite
         Dim text = Await UtilWeb.GetTextFromUrlAsync(URL_IMG_JSON)
         obj._imageJson = Newtonsoft.Json.Linq.JObject.Parse(text)
