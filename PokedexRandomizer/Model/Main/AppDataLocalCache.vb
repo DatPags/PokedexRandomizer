@@ -14,9 +14,8 @@ Public Class AppDataLocalCache
     Private Const CACHE_LENGTH_PKMN_SECONDS As ULong = 60 * 60 * 24 * 3 '3 days
 
     Public Function GetImageIfExists(key As String) As BitmapImage Implements IImageCache.GetImageIfExists
-        Dim hash As Integer = key.GetHashCode()
         If Not CreateDirectory(CACHE_DIRECTORY_IMAGES) Then Return Nothing
-        Dim path As String = IO.Path.Combine(CACHE_DIRECTORY_IMAGES, hash.ToString & IMAGE_EXT)
+        Dim path As String = IO.Path.Combine(CACHE_DIRECTORY_IMAGES, GenerateFilename(key, IMAGE_EXT))
         Try
             'check for cache expiration
             Dim lastWriteTime As Date = IO.File.GetLastWriteTimeUtc(path)
@@ -44,9 +43,8 @@ Public Class AppDataLocalCache
     End Function
 
     Public Sub StoreImageInCache(image As BitmapImage, key As String) Implements IImageCache.StoreImageInCache
-        Dim hash As Integer = key.GetHashCode()
         If Not CreateDirectory(CACHE_DIRECTORY_IMAGES) Then Exit Sub
-        Dim path As String = IO.Path.Combine(CACHE_DIRECTORY_IMAGES, hash.ToString & IMAGE_EXT)
+        Dim path As String = IO.Path.Combine(CACHE_DIRECTORY_IMAGES, GenerateFilename(key, IMAGE_EXT))
         Try
             image.Save(path)
         Catch ex As Exception When TypeOf ex Is IO.IOException Or TypeOf ex Is UnauthorizedAccessException _
@@ -57,9 +55,8 @@ Public Class AppDataLocalCache
     End Sub
 
     Public Function GetPkmnInfoIfExists(key As String) As PkmnInfo? Implements IPkmnInfoCache.GetPkmnInfoIfExists
-        Dim hash As Integer = key.GetHashCode()
         If Not CreateDirectory(CACHE_DIRECTORY_PKMN) Then Return Nothing
-        Dim path As String = IO.Path.Combine(CACHE_DIRECTORY_PKMN, hash.ToString & PKMN_EXT)
+        Dim path As String = IO.Path.Combine(CACHE_DIRECTORY_PKMN, GenerateFilename(key, PKMN_EXT))
         Try
             'check for cache expiration
             Dim lastWriteTime As Date = IO.File.GetLastWriteTimeUtc(path)
@@ -83,9 +80,8 @@ Public Class AppDataLocalCache
     End Function
 
     Public Sub StorePkmnInfoInCache(info As PkmnInfo, key As String) Implements IPkmnInfoCache.StorePkmnInfoInCache
-        Dim hash As Integer = key.GetHashCode()
         If Not CreateDirectory(CACHE_DIRECTORY_PKMN) Then Exit Sub
-        Dim path As String = IO.Path.Combine(CACHE_DIRECTORY_PKMN, hash.ToString & PKMN_EXT)
+        Dim path As String = IO.Path.Combine(CACHE_DIRECTORY_PKMN, GenerateFilename(key, PKMN_EXT))
         Try
             Dim bf As New BinaryFormatter
             Using fs As New FileStream(path, FileMode.Create)
@@ -97,6 +93,11 @@ Public Class AppDataLocalCache
             File.Delete(path)
         End Try
     End Sub
+
+    Private Function GenerateFilename(key As String, ext As String) As String
+        Dim hash As UInteger = Int32_To_UInt32(key.GetHashCode())
+        Return hash.ToString & ext
+    End Function
 
     Private Function CreateDirectory(path As String) As Boolean
         Try

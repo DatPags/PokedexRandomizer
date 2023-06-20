@@ -4,13 +4,10 @@
     Private Const MANUAL_IDX = MAX_COLS + 1
     Private Const TOTAL_INFO = MAX_COLS + 1
 
-    Private _ran As Random = New Random
-    Private _maxNum As Integer
-    Private _urlList As List(Of UrlInfo)
-    Private _urlNameMap As Dictionary(Of String, UrlInfo)
     Private _pkmnInfoRetriever As PkmnInfoRetriever
     Private _settings As Settings
 
+    Private _ran As Random = New Random
     Private _displays(TOTAL_INFO) As PkmnDisplay
     Private _numPkmnLabel As Label
     Private _skips As SkipsDisplay
@@ -30,6 +27,7 @@
 
         ' Initialize settings
         _settings = New Settings()
+        MenuForms.IsChecked = _settings.PrioritizeForms
         MenuCache.IsChecked = _settings.UseCache
         MenuCache.Visibility = Visibility.Collapsed
 #If DEBUG Then
@@ -63,13 +61,10 @@
 
         ' Load url list, category images, and pokemon image json
         _numPkmnLabel.Content = "Initializing..."
-        _pkmnInfoRetriever = New PkmnInfoRetriever
-        _pkmnInfoRetriever.InfoEngine.Init()
-        _urlList = Await _pkmnInfoRetriever.Url_List()
-        _maxNum = _urlList.Count
-        Build_Name_Map()
-        _pkmnInfoRetriever.ImageEngine.Init()
-        _numPkmnLabel.Content = "Total number of Pokémon: " & _maxNum.ToString
+        Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderPokemonDB.Create_Self()
+        Dim imageEngine As IPkmnImageFinder = Await PkmnImageFinderPokesprite.Create_Self()
+        _pkmnInfoRetriever = New PkmnInfoRetriever(infoEngine, imageEngine)
+        _numPkmnLabel.Content = "Total number of Pokémon: " & _pkmnInfoRetriever.Total_Number_Of_Pokemon().ToString
         MoveDisplay.Init_Cat_Images()
 
         RandomizeButton.IsEnabled = True
@@ -84,7 +79,7 @@
 
         Dim randomNumbers As New List(Of Integer)
         Do
-            Dim number = _ran.Next(maxValue:=_maxNum)
+            Dim number = _ran.Next(maxValue:=_pkmnInfoRetriever.Total_Number_Of_Pokemon())
             If Not randomNumbers.Contains(number) Then
                 randomNumbers.Add(number)
             End If
@@ -92,13 +87,13 @@
 
         Dim tasks As New List(Of Task(Of Pkmn))
         For index = 0 To NumberCombobox.SelectedIndex
-            tasks.Add(_pkmnInfoRetriever.Get_Pkmn_Info(randomNumbers(index) + 1, _urlList(randomNumbers(index)).url, _settings))
+            tasks.Add(_pkmnInfoRetriever.Get_Pkmn_Info(randomNumbers(index) + 1, _settings))
             _displays(index).Set_Loading()
         Next
 
         Dim listIndex = 0
         For Each pkmnInfo In Await Task.WhenAll(tasks)
-            Dim form_game_index = Random_Entry(pkmnInfo)
+            Dim form_game_index = _pkmnInfoRetriever.Random_Entry(pkmnInfo, _settings)
             _displays(listIndex).Populate_Display(pkmnInfo, form_game_index(0), form_game_index(1), form_game_index(2))
             listIndex += 1
         Next
@@ -112,15 +107,15 @@
         EntryListBox.Items.Clear()
         FormListBox.Items.Clear()
 
-        Dim inputResult = Validate_For_Url(ManualTextBox.Text.Trim)
-        If Not inputResult.Item1 Then
-            _displays(MANUAL_IDX).Set_Text(inputResult.Item3)
+        Dim pkmnNum As Integer, result As String = ""
+        If Not _pkmnInfoRetriever.Validate_Search(ManualTextBox.Text.Trim, pkmnNum, result) Then
+            _displays(MANUAL_IDX).Set_Text(result)
             ManualButton.IsEnabled = True
             Exit Sub
         End If
 
         _displays(MANUAL_IDX).Set_Loading()
-        Dim pkmnInfo = Await _pkmnInfoRetriever.Get_Pkmn_Info(inputResult.Item2, inputResult.Item3, _settings)
+        Dim pkmnInfo = Await _pkmnInfoRetriever.Get_Pkmn_Info(pkmnNum, _settings)
         _displays(MANUAL_IDX).Populate_Display(pkmnInfo, 0, 0, 0)
         Fill_Entry_List(pkmnInfo)
         Fill_Form_List(pkmnInfo)
@@ -133,15 +128,15 @@
         Reset_Pkmn_Columns(MOVES_IDX, MOVES_IDX)
         MoveListBox.Items.Clear()
 
-        Dim inputResult = Validate_For_Url(MovesTextBox.Text.Trim)
-        If Not inputResult.Item1 Then
-            _displays(MOVES_IDX).Set_Text(inputResult.Item3)
+        Dim pkmnNum As Integer, result As String = ""
+        If Not _pkmnInfoRetriever.Validate_Search(MovesTextBox.Text.Trim, pkmnNum, result) Then
+            _displays(MOVES_IDX).Set_Text(result)
             MovesButton.IsEnabled = True
             Exit Sub
         End If
 
         _displays(MOVES_IDX).Set_Loading()
-        Dim pkmnInfo = Await _pkmnInfoRetriever.Get_Pkmn_Info(inputResult.Item2, inputResult.Item3, _settings)
+        Dim pkmnInfo = Await _pkmnInfoRetriever.Get_Pkmn_Info(pkmnNum, _settings)
         _displays(MOVES_IDX).Populate_Display(pkmnInfo, 0, 0, 0)
         Fill_Move_List(pkmnInfo)
 
@@ -155,7 +150,7 @@
                 Dim formMoves As FormMoveDisplay = MoveListBox.Items.GetItemAt(formIndex)
                 Dim abilityList = pkmnInfo.pkmn.abilities(pkmnInfo.pkmn.forms.IndexOf(pkmnInfo.pkmn.moveForms(formIndex)))
                 formMoves.PkmnAbility = abilityList(_ran.Next(abilityList.Count))
-                formMoves.PkmnMoveList = Generate_Random_Moves(pkmnInfo.pkmn.moves(formIndex))
+                formMoves.PkmnMoveList = _pkmnInfoRetriever.Generate_Random_Moves(pkmnInfo.pkmn.moves(formIndex))
             Next
         End If
     End Sub
@@ -215,6 +210,10 @@
         _settings.UseCache = MenuCache.IsChecked
         Debug.WriteLine("DEBUG: Cache is " + If(_settings.UseCache, "enabled", "disabled"))
     End Sub
+
+    Private Sub MenuForms_Click(sender As Object, e As RoutedEventArgs) Handles MenuForms.Click
+        _settings.PrioritizeForms = MenuForms.IsChecked
+    End Sub
 #End Region
 
 #Region "Pkmn Columns"
@@ -231,150 +230,6 @@
             _displays(index).Clear_Display()
         Next
     End Sub
-#End Region
-
-#Region "Utilities"
-    Private Function Random_Entry(pkmnInfo As Pkmn) As List(Of Integer)
-        Dim entryToUse = _ran.Next(maxValue:=pkmnInfo.pkmn.games.Count)
-        Dim formIndex As Integer
-        If pkmnInfo.pkmn.forms.Count > 1 Then
-            If MenuForms.IsChecked Then
-                ' Prioritize forms, select an entry that matches the chosen form
-                formIndex = _ran.Next(maxValue:=pkmnInfo.pkmn.forms.Count)
-                Dim entriesChoose = New List(Of Integer)
-                For entryIdx = 0 To pkmnInfo.pkmn.games.Count - 1
-                    If pkmnInfo.pkmn.forms(formIndex) = pkmnInfo.pkmn.name Then
-                        If Not pkmnInfo.pkmn.games(entryIdx).Contains("(") And Not pkmnInfo.pkmn.games(entryIdx).EndsWith(")") Then
-                            entriesChoose.Add(entryIdx)
-                        End If
-                    Else
-                        If pkmnInfo.pkmn.games(entryIdx).Contains("(") And pkmnInfo.pkmn.games(entryIdx).EndsWith(")") Then
-                            Dim gameName = pkmnInfo.pkmn.games(entryIdx)
-                            Dim i = gameName.IndexOf("(")
-                            Dim gameNameSubstr = gameName.Substring(i + 1, gameName.IndexOf(")", i + 1) - i - 1)
-                            If gameNameSubstr = pkmnInfo.pkmn.forms(formIndex) Then
-                                entriesChoose.Add(entryIdx)
-                            End If
-                        End If
-                    End If
-                Next
-                If entriesChoose.Count > 0 Then
-                    Dim entryIdx = _ran.Next(maxValue:=entriesChoose.Count)
-                    entryToUse = entriesChoose(entryIdx)
-                End If
-            Else
-                ' Prioritize entries, attempt to match chosen entry to a form
-                If pkmnInfo.pkmn.games(entryToUse).Contains("(") And pkmnInfo.pkmn.games(entryToUse).EndsWith(")") Then
-                    ' If game name has (), choose the form that matches the text in the ()
-                    Dim gameName = pkmnInfo.pkmn.games(entryToUse)
-                    Dim i = gameName.IndexOf("(")
-                    Dim gameNameSubstr = gameName.Substring(i + 1, gameName.IndexOf(")", i + 1) - i - 1)
-                    Dim foundForm = False
-                    For fi = 0 To pkmnInfo.pkmn.forms.Count - 1
-                        Dim formName = pkmnInfo.pkmn.forms(fi)
-                        If formName = gameNameSubstr Then
-                            formIndex = fi
-                            foundForm = True
-                            Exit For
-                        End If
-                    Next
-                    If Not foundForm Then
-                        ' If no form matches what's in the (), choose a form at random
-                        formIndex = _ran.Next(maxValue:=pkmnInfo.pkmn.forms.Count)
-                    End If
-                Else
-                    ' If the game doesn't have (), choose a form that isn't in the () of another game
-                    Dim possibleForms = New List(Of Integer)
-                    For fi = 0 To pkmnInfo.pkmn.forms.Count - 1
-                        Dim formName = pkmnInfo.pkmn.forms(fi)
-                        Dim formNamePossible = True
-                        For Each gameName In pkmnInfo.pkmn.games
-                            If gameName.Contains("(") And gameName.EndsWith(")") Then
-                                Dim i = gameName.IndexOf("(")
-                                Dim gameNameSubstr = gameName.Substring(i + 1, gameName.IndexOf(")", i + 1) - i - 1)
-                                If formName = gameNameSubstr Then
-                                    formNamePossible = False
-                                    Exit For
-                                End If
-                            End If
-                        Next
-                        If formNamePossible Then
-                            possibleForms.Add(fi)
-                        End If
-                    Next
-                    If possibleForms.Count > 0 Then
-                        formIndex = possibleForms(_ran.Next(maxValue:=possibleForms.Count))
-                    Else
-                        ' If every form name is in another game name's (), choose a form at random
-                        formIndex = _ran.Next(maxValue:=pkmnInfo.pkmn.forms.Count)
-                    End If
-                End If
-            End If
-        Else
-            ' Only 1 form, so choose any entry
-            formIndex = 0
-        End If
-        Return New List(Of Integer) From {{formIndex}, {entryToUse},
-            {_ran.Next(maxValue:=pkmnInfo.pkmn.abilities(formIndex).Count)}}
-    End Function
-
-    Private Function Generate_Random_Moves(moveList As List(Of MoveInfo)) As List(Of MoveInfo)
-        Dim randomMoves = New List(Of MoveInfo)
-        If moveList.Count <= 4 Then
-            Return moveList
-        Else
-            Dim randomNumbers = New List(Of Integer)
-            Do While randomNumbers.Count < 4
-                Dim rand = _ran.Next(maxValue:=moveList.Count)
-                Dim inList = False
-                For Each x In randomNumbers
-                    If rand = x Then
-                        inList = True
-                        Exit For
-                    End If
-                Next
-                If Not inList Then
-                    randomNumbers.Add(rand)
-                    randomMoves.Add(moveList(rand))
-                End If
-            Loop
-            Return randomMoves
-        End If
-    End Function
-
-    Private Sub Build_Name_Map()
-        _urlNameMap = New Dictionary(Of String, UrlInfo)
-        For Each urlInfo In _urlList
-            _urlNameMap.Add(urlInfo.name.ToLower, urlInfo)
-            If urlInfo.name.ToLower.Contains("é") Then
-                _urlNameMap.Add(urlInfo.name.ToLower.Replace("é", "e"), urlInfo)
-            End If
-            If urlInfo.name.ToLower.Contains("♂") Then
-                _urlNameMap.Add(urlInfo.name.ToLower.Replace("♂", "-m"), urlInfo)
-            End If
-            If urlInfo.name.ToLower.Contains("♀") Then
-                _urlNameMap.Add(urlInfo.name.ToLower.Replace("♀", "-f"), urlInfo)
-            End If
-        Next
-    End Sub
-
-    Private Function Validate_For_Url(textboxContent As String) As (Boolean, Integer, String)
-        Dim pkmnNum As Integer
-        If Not Integer.TryParse(textboxContent, pkmnNum) Then
-            ' Test this as a name
-            If Not _urlNameMap.ContainsKey(textboxContent.ToLower) Then
-                Return (False, 0, $"{textboxContent} is not a valid name.")
-            End If
-            Return (True, _urlNameMap(textboxContent.ToLower).number, _urlNameMap(textboxContent.ToLower).url)
-        Else
-            ' Test this as a number
-            pkmnNum = Integer.Parse(textboxContent)
-            If pkmnNum <= 0 Or pkmnNum > _maxNum Then
-                Return (False, 0, $"{textboxContent} is not a valid dex number.")
-            End If
-            Return (True, pkmnNum, _urlList(pkmnNum - 1).url)
-        End If
-    End Function
 #End Region
 
 #Region "Fill Listboxes"
@@ -408,7 +263,7 @@
                 abilityList = pkmnInfo.pkmn.abilities(0)
             End If
             Dim formName = pkmnInfo.pkmn.moveForms(formIndex)
-            Dim randomMoves = Generate_Random_Moves(pkmnInfo.pkmn.moves(formIndex))
+            Dim randomMoves = _pkmnInfoRetriever.Generate_Random_Moves(pkmnInfo.pkmn.moves(formIndex))
             Dim ability = abilityList(_ran.Next(abilityList.Count))
             Dim formMoves = New FormMoveDisplay(im, formName, ability, randomMoves)
 

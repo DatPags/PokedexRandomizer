@@ -124,6 +124,7 @@
     <Compile Include="Model\Main\PkmnInfoFinderPokemonDB.vb" />
     <Compile Include="Model\Main\Settings.vb" />
     <Compile Include="Model\Util\Extensions.vb" />
+    <Compile Include="Model\Util\UtilWeb.vb" />
     <Compile Include="UI\EntryDisplay.vb" />
     <Compile Include="UI\FormDisplay.vb" />
     <Compile Include="UI\FormMoveDisplay.vb" />

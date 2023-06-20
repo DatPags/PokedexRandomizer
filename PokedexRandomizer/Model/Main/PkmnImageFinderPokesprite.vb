@@ -9,25 +9,27 @@
 
     Private _imageJson As Newtonsoft.Json.Linq.JObject
 
-    Public Async Sub Init() Implements IPkmnImageFinder.Init
+    Public Shared Async Function Create_Self() As Task(Of PkmnImageFinderPokesprite)
+        Dim obj = New PkmnImageFinderPokesprite
         Dim text = Await Get_Text_Async(URL_IMG_JSON)
-        _imageJson = Newtonsoft.Json.Linq.JObject.Parse(text)
-    End Sub
+        obj._imageJson = Newtonsoft.Json.Linq.JObject.Parse(text)
+        Return obj
+    End Function
 
-    Public Async Function Get_All_Images_For_Pkmn(pkmnInfo As Pkmn, settings As Settings) As Task(Of List(Of BitmapImage)) Implements IPkmnImageFinder.Get_All_Images_For_Pkmn
+    Public Async Function Get_All_Images_For_Pkmn(pkmnInfo As PkmnInfo, settings As Settings) As Task(Of List(Of BitmapImage)) Implements IPkmnImageFinder.Get_All_Images_For_Pkmn
         Dim imgList As New List(Of BitmapImage), baseName As String = "", formsToken As Newtonsoft.Json.Linq.JToken = Nothing, forms As New List(Of Newtonsoft.Json.Linq.JToken)
         Dim imgUnknown As Boolean = False
         Try
             imgList = New List(Of BitmapImage)
-            baseName = _imageJson.SelectToken(pkmnInfo.pkmn.number.ToString("D3")).SelectToken("slug").SelectToken("eng").ToString
-            formsToken = _imageJson.SelectToken(pkmnInfo.pkmn.number.ToString("D3")).SelectToken("gen-8").SelectToken("forms")
+            baseName = _imageJson.SelectToken(pkmnInfo.number.ToString("D3")).SelectToken("slug").SelectToken("eng").ToString
+            formsToken = _imageJson.SelectToken(pkmnInfo.number.ToString("D3")).SelectToken("gen-8").SelectToken("forms")
             forms = formsToken.Children.ToList
         Catch ex As Exception
             ' Pokedex number is not in the list
             imgUnknown = True
         End Try
 
-        For formIndex = 0 To pkmnInfo.pkmn.forms.Count - 1
+        For formIndex = 0 To pkmnInfo.forms.Count - 1
             ' Unknown image for Pokemon not added yet
             If imgUnknown Then
                 If imgList.Count = 0 Then
@@ -43,24 +45,24 @@
             End If
 
             ' Special cases for certain Pokemon
-            If pkmnInfo.pkmn.name = "Urshifu" Then
+            If pkmnInfo.name = "Urshifu" Then
                 Try
                     imgList.Add(Await Get_Pkmn_Image(baseName, settings))
                 Catch ex As System.Net.WebException
                     imgList.Add(Nothing)
                 End Try
                 Continue For
-            ElseIf pkmnInfo.pkmn.name = "Pikachu" AndAlso formIndex > 0 Then
+            ElseIf pkmnInfo.name = "Pikachu" AndAlso formIndex > 0 Then
                 imgList.Add(imgList(0))
                 Continue For
-            ElseIf pkmnInfo.pkmn.name = "Minior" AndAlso formIndex > 0 Then
+            ElseIf pkmnInfo.name = "Minior" AndAlso formIndex > 0 Then
                 Try
                     imgList.Add(Await Get_Pkmn_Image(baseName & "-blue", settings))
                 Catch ex As System.Net.WebException
                     imgList.Add(Nothing)
                 End Try
                 Continue For
-            ElseIf pkmnInfo.pkmn.name = "Darmanitan" AndAlso pkmnInfo.pkmn.forms(formIndex) = "Galarian Zen Mode" Then
+            ElseIf pkmnInfo.name = "Darmanitan" AndAlso pkmnInfo.forms(formIndex) = "Galarian Zen Mode" Then
                 Try
                     imgList.Add(Await Get_Pkmn_Image(baseName & "-galar-zen", settings))
                 Catch ex As System.Net.WebException
@@ -69,7 +71,7 @@
                 Continue For
             End If
 
-            If formIndex = 0 AndAlso pkmnInfo.pkmn.name = pkmnInfo.pkmn.forms(formIndex) Then
+            If formIndex = 0 AndAlso pkmnInfo.name = pkmnInfo.forms(formIndex) Then
                 ' Get base image if this is first form and form name = pokemon name
                 Try
                     imgList.Add(Await Get_Pkmn_Image(baseName, settings))
@@ -78,7 +80,7 @@
                 End Try
             Else
                 ' For male/female form differences, check in a different location if they exist
-                If pkmnInfo.pkmn.forms(formIndex) = "Male" Then
+                If pkmnInfo.forms(formIndex) = "Male" Then
                     Try
                         imgList.Add(Await Get_Pkmn_Image(baseName, settings))
                     Catch ex As System.Net.WebException
@@ -89,7 +91,7 @@
                         End If
                     End Try
                     Continue For
-                ElseIf pkmnInfo.pkmn.forms(formIndex) = "Female" Then
+                ElseIf pkmnInfo.forms(formIndex) = "Female" Then
                     Dim getFemaleImg = False
                     Dim baseForm = formsToken.Children.ToList(0).SelectToken("$")
                     Dim hasFemaleToken = baseForm.Children.ToList(0).SelectToken("has_female")
@@ -132,8 +134,8 @@
                 End If
 
                 ' Reduce form name into a version that we can check if it's a form image name
-                Dim formName = System.Text.RegularExpressions.Regex.Replace(pkmnInfo.pkmn.forms(formIndex), "[^a-zA-Z0-9- ]", "")
-                Dim pkmnNameFix = System.Text.RegularExpressions.Regex.Replace(pkmnInfo.pkmn.name, "[^a-zA-Z0-9- ]", "")
+                Dim formName = System.Text.RegularExpressions.Regex.Replace(pkmnInfo.forms(formIndex), "[^a-zA-Z0-9- ]", "")
+                Dim pkmnNameFix = System.Text.RegularExpressions.Regex.Replace(pkmnInfo.name, "[^a-zA-Z0-9- ]", "")
                 Dim imgNameCheck As String
                 If formName.Contains(pkmnNameFix) Then
                     imgNameCheck = formName.Remove(formName.IndexOf(pkmnNameFix), pkmnNameFix.Length)
