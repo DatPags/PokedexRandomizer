@@ -117,7 +117,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Model\Images\AppDataLocalCache.vb" />
+    <Compile Include="Model\Main\AppDataLocalCache.vb" />
     <Compile Include="Model\Interfaces\IImageCache.vb" />
     <Compile Include="Model\Interfaces\IPkmnInfoCache.vb" />
     <Compile Include="Model\Main\Settings.vb" />
@@ -128,7 +128,7 @@
     <Compile Include="Model\Interfaces\IPkmnImageFinder.vb" />
     <Compile Include="UI\MoveDisplay.vb" />
     <Compile Include="UI\PkmnDisplay.vb" />
-    <Compile Include="Model\Images\PkmnImageFinderPokesprite.vb" />
+    <Compile Include="Model\Main\PkmnImageFinderPokesprite.vb" />
     <Compile Include="Model\Main\PkmnInfoRetriever.vb" />
     <Compile Include="Model\Main\PkmnStructs.vb" />
     <Compile Include="UI\SkipsDisplay.vb" />
