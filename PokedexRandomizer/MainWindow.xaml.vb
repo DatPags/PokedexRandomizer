@@ -64,12 +64,13 @@
         ' Load url list, category images, and pokemon image json
         _numPkmnLabel.Content = "Initializing..."
         _pkmnInfoRetriever = New PkmnInfoRetriever
+        _pkmnInfoRetriever.InfoEngine.Init()
         _urlList = Await _pkmnInfoRetriever.Url_List()
         _maxNum = _urlList.Count
         Build_Name_Map()
+        _pkmnInfoRetriever.ImageEngine.Init()
+        _numPkmnLabel.Content = "Total number of Pokémon: " & _maxNum.ToString
         MoveDisplay.Init_Cat_Images()
-        PkmnInfoRetriever.Init_Pkmn_Images()
-        _numPkmnLabel.Content = "Total number of Pokemon: " & _maxNum.ToString
 
         RandomizeButton.IsEnabled = True
         MovesButton.IsEnabled = True

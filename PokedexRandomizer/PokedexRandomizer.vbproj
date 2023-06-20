@@ -117,9 +117,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Model\Interfaces\IPkmnInfoFinder.vb" />
     <Compile Include="Model\Main\AppDataLocalCache.vb" />
     <Compile Include="Model\Interfaces\IImageCache.vb" />
     <Compile Include="Model\Interfaces\IPkmnInfoCache.vb" />
+    <Compile Include="Model\Main\PkmnInfoFinderPokemonDB.vb" />
     <Compile Include="Model\Main\Settings.vb" />
     <Compile Include="Model\Util\Extensions.vb" />
     <Compile Include="UI\EntryDisplay.vb" />
