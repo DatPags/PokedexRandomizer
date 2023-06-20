@@ -9,6 +9,7 @@
     Private _urlList As List(Of UrlInfo)
     Private _urlNameMap As Dictionary(Of String, UrlInfo)
     Private _pkmnInfoRetriever As PkmnInfoRetriever
+    Private _settings As Settings
 
     Private _displays(TOTAL_INFO) As PkmnDisplay
     Private _numPkmnLabel As Label
@@ -26,6 +27,14 @@
         RandomizeTop.Children.Add(_skips)
         _currentTab = 0
         TabsBase.AddHandler(TabControl.SelectionChangedEvent, New RoutedEventHandler(AddressOf TabsBase_SelectionChanged))
+
+        ' Initialize settings
+        _settings = New Settings()
+        MenuCache.IsChecked = _settings.UseCache
+        MenuCache.Visibility = Visibility.Collapsed
+#If DEBUG Then
+        MenuCache.Visibility = Visibility.Visible
+#End If
 
         ' Add all pokemon displays to the UI
         NumberCombobox.ItemsSource = Enumerable.Range(1, MAX_COLS)
@@ -82,7 +91,7 @@
 
         Dim tasks As New List(Of Task(Of Pkmn))
         For index = 0 To NumberCombobox.SelectedIndex
-            tasks.Add(_pkmnInfoRetriever.Get_Pkmn_Info(randomNumbers(index) + 1, _urlList(randomNumbers(index)).url))
+            tasks.Add(_pkmnInfoRetriever.Get_Pkmn_Info(randomNumbers(index) + 1, _urlList(randomNumbers(index)).url, _settings))
             _displays(index).Set_Loading()
         Next
 
@@ -110,7 +119,7 @@
         End If
 
         _displays(MANUAL_IDX).Set_Loading()
-        Dim pkmnInfo = Await _pkmnInfoRetriever.Get_Pkmn_Info(inputResult.Item2, inputResult.Item3)
+        Dim pkmnInfo = Await _pkmnInfoRetriever.Get_Pkmn_Info(inputResult.Item2, inputResult.Item3, _settings)
         _displays(MANUAL_IDX).Populate_Display(pkmnInfo, 0, 0, 0)
         Fill_Entry_List(pkmnInfo)
         Fill_Form_List(pkmnInfo)
@@ -131,7 +140,7 @@
         End If
 
         _displays(MOVES_IDX).Set_Loading()
-        Dim pkmnInfo = Await _pkmnInfoRetriever.Get_Pkmn_Info(inputResult.Item2, inputResult.Item3)
+        Dim pkmnInfo = Await _pkmnInfoRetriever.Get_Pkmn_Info(inputResult.Item2, inputResult.Item3, _settings)
         _displays(MOVES_IDX).Populate_Display(pkmnInfo, 0, 0, 0)
         Fill_Move_List(pkmnInfo)
 
@@ -199,6 +208,11 @@
 
     Private Sub Exit_App(sender As Object, e As RoutedEventArgs)
         System.Windows.Application.Current.Shutdown()
+    End Sub
+
+    Private Sub MenuCache_Click(sender As Object, e As RoutedEventArgs) Handles MenuCache.Click
+        _settings.UseCache = MenuCache.IsChecked
+        Debug.WriteLine("DEBUG: Cache is " + If(_settings.UseCache, "enabled", "disabled"))
     End Sub
 #End Region
 
