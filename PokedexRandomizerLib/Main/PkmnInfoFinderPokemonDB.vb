@@ -517,7 +517,7 @@
                         If data.moveCountdown = 3 Then
                             ' <img title="-"> will be a move category during a move countdown
                             data.tempMove.category = attrValue
-                            'data.moveCountdown -= 1
+                            data.moveCountdown -= 1
                         End If
                     End If
 
@@ -617,9 +617,9 @@
                     Select Case data.moveCountdown
                         Case 4
                             data.tempMove.type = text
-                        Case 3
-                            data.tempMove.power = text
                         Case 2
+                            data.tempMove.power = text
+                        Case 1
                             data.tempMove.accuracy = UtilWeb.DecodeHtmlString(text)
                             If data.addMoveToAll Then
                                 For formIndex = 0 To data.forms.Count - 1
