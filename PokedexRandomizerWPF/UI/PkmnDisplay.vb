@@ -178,7 +178,11 @@ Public Class PkmnDisplay : Inherits Grid
             _forms.SelectedValue = ""
         End If
 
-        _games.SelectedValue = _pkmnInfo.pkmn.games(gameIndex)
+        If _pkmnInfo.pkmn.games.Count > 0 Then
+            _games.SelectedValue = _pkmnInfo.pkmn.games(gameIndex)
+        Else
+            _entry.Text = "Ecology under research."
+        End If
 
         _abilities.SelectedIndex = abilityIndex
     End Sub
