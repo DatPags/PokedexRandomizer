@@ -1,4 +1,7 @@
-﻿Public Class UtilWeb
+﻿Imports System.Net.Http
+Imports System.Net.Http.Handlers
+
+Public Class UtilWeb
     Public Shared Function DecodeHtmlStringList(strList As List(Of String)) As List(Of String)
         Dim newList = New List(Of String)
         For Each item In strList
@@ -27,8 +30,18 @@
         Return Await Util.HttpClient.GetStringAsync(url)
     End Function
 
-    Public Shared Async Function GetBytesFromUrlAsync(url As String) As Task(Of Byte())
+    Public Shared Async Function GetBytesFromUrlAsync(url As String, Optional pi As IProgress(Of String) = Nothing) As Task(Of Byte())
         Debug.WriteLine("Getting bytes from URL: " + url)
-        Return Await Util.HttpClient.GetByteArrayAsync(url)
+        If pi IsNot Nothing Then
+            Dim handler As New HttpClientHandler() With {.AllowAutoRedirect = True}
+            Dim ph As New ProgressMessageHandler(handler)
+            AddHandler ph.HttpReceiveProgress, Sub(sender, args)
+                                                   pi.Report("Downloading new data: " + String.Format("{0:N3}", args.BytesTransferred / Convert.ToDouble(1024) / Convert.ToDouble(1024)) + " / " + String.Format("{0:N3}", args.TotalBytes / Convert.ToDouble(1024) / Convert.ToDouble(1024)) + " MB")
+                                               End Sub
+            Dim reportClient = New HttpClient(ph)
+            Return Await reportClient.GetByteArrayAsync(url)
+        Else
+            Return Await Util.HttpClient.GetByteArrayAsync(url)
+        End If
     End Function
 End Class
