@@ -1,4 +1,6 @@
 ﻿Imports System.Drawing
+Imports System.IO
+Imports System.Security.Cryptography
 Imports System.Net.Http
 Imports Newtonsoft.Json
 
@@ -76,9 +78,14 @@ Public Class Util
 
         '--zip up the data and delete the working directory
         Debug.WriteLine("Starting zip file creation...")
-        IO.Compression.ZipFile.CreateFromDirectory(workingDir, IO.Path.Combine(DIRECTORY_BASE, "data.zip"), IO.Compression.CompressionLevel.Optimal, False)
+        Dim zipPath As String = IO.Path.Combine(DIRECTORY_BASE, "data.zip")
+        IO.Compression.ZipFile.CreateFromDirectory(workingDir, zipPath, IO.Compression.CompressionLevel.Optimal, False)
         IO.Directory.Delete(workingDir, True)
         Debug.WriteLine("Zip file created")
+
+        '--produce the hash of the new data archive
+        Dim hash As String = ProduceHashOfFile(zipPath)
+        Await IO.File.WriteAllTextAsync(IO.Path.Combine(DIRECTORY_BASE, "hash.txt"), hash)
     End Function
 
     Private Shared Async Function CreateTypeColorMap() As Task
@@ -164,5 +171,25 @@ Public Class Util
 
         json = Await IO.File.ReadAllTextAsync(IO.Path.Combine(DIRECTORY_BASE, "gamecolormap.json"))
         _gameColorMap = JsonConvert.DeserializeObject(Of Dictionary(Of String, Color))(json)
+    End Function
+
+    Public Shared Function ProduceHashOfFile(file_name As String) As String
+        Dim hash = System.Security.Cryptography.MD5.Create()
+        Dim hashValue() As Byte
+        Dim fileStream As FileStream = File.OpenRead(file_name)
+        fileStream.Position = 0
+        hashValue = hash.ComputeHash(fileStream)
+        Dim hash_hex = PrintByteArray(hashValue)
+        fileStream.Close()
+        Return hash_hex
+    End Function
+
+    Public Shared Function PrintByteArray(array() As Byte) As String
+        Dim hex_value As String = ""
+        Dim i As Integer
+        For i = 0 To array.Length - 1
+            hex_value += array(i).ToString("X2")
+        Next i
+        Return hex_value.ToLower
     End Function
 End Class
