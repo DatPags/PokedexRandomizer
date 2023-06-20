@@ -117,18 +117,18 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="EntryDisplay.vb" />
-    <Compile Include="FormDisplay.vb" />
-    <Compile Include="FormMoveDisplay.vb" />
-    <Compile Include="IPkmnImageFinder.vb" />
-    <Compile Include="MoveDisplay.vb" />
-    <Compile Include="PkmnDisplay.vb" />
-    <Compile Include="PkmnImageFinderPokesprite.vb" />
-    <Compile Include="PkmnInfoRetriever.vb" />
-    <Compile Include="PkmnStructs.vb" />
-    <Compile Include="SkipsDisplay.vb" />
-    <Compile Include="Util.vb" />
-    <Compile Include="UtilImage.vb" />
+    <Compile Include="UI\EntryDisplay.vb" />
+    <Compile Include="UI\FormDisplay.vb" />
+    <Compile Include="UI\FormMoveDisplay.vb" />
+    <Compile Include="Model\Interfaces\IPkmnImageFinder.vb" />
+    <Compile Include="UI\MoveDisplay.vb" />
+    <Compile Include="UI\PkmnDisplay.vb" />
+    <Compile Include="Model\Images\PkmnImageFinderPokesprite.vb" />
+    <Compile Include="Model\Main\PkmnInfoRetriever.vb" />
+    <Compile Include="Model\Main\PkmnStructs.vb" />
+    <Compile Include="UI\SkipsDisplay.vb" />
+    <Compile Include="Model\Util\Util.vb" />
+    <Compile Include="Model\Util\UtilImage.vb" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
