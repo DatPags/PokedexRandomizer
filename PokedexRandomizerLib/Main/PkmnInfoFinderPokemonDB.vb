@@ -517,7 +517,7 @@
                         If data.moveCountdown = 3 Then
                             ' <img title="-"> will be a move category during a move countdown
                             data.tempMove.category = attrValue
-                            data.moveCountdown -= 1
+                            'data.moveCountdown -= 1
                         End If
                     End If
 
