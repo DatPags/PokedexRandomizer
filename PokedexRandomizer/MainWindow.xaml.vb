@@ -59,13 +59,14 @@
         _displays(MANUAL_IDX) = manualDisplay
         ManualBase.Children.Add(manualDisplay)
 
-        ' Load url list, category images, and pokemon image json
+        ' initialize the model
         _numPkmnLabel.Content = "Initializing..."
         Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderPokemonDB.Create_Self()
         Dim imageEngine As IPkmnImageFinder = Await PkmnImageFinderPokesprite.Create_Self()
-        _pkmnInfoRetriever = New PkmnInfoRetriever(infoEngine, imageEngine)
+        Dim cache As New AppDataLocalCache()
+        _pkmnInfoRetriever = New PkmnInfoRetriever(infoEngine, imageEngine, infoCache:=cache, imageCache:=cache)
         _numPkmnLabel.Content = "Total number of Pokémon: " & _pkmnInfoRetriever.Total_Number_Of_Pokemon().ToString
-        MoveDisplay.Init_Cat_Images()
+        MoveDisplay.Init_Cat_Images(_settings, cache)
 
         RandomizeButton.IsEnabled = True
         MovesButton.IsEnabled = True
@@ -213,6 +214,10 @@
 
     Private Sub MenuForms_Click(sender As Object, e As RoutedEventArgs) Handles MenuForms.Click
         _settings.PrioritizeForms = MenuForms.IsChecked
+    End Sub
+
+    Private Sub MenuCacheClear_Click(sender As Object, e As RoutedEventArgs) Handles MenuCacheClear.Click
+
     End Sub
 #End Region
 

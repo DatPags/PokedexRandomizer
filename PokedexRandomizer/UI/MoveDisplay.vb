@@ -132,9 +132,9 @@
         Me.Children.Add(_accText)
     End Sub
 
-    Public Shared Async Sub Init_Cat_Images()
-        _catPhysical = Await Get_Image_Async(URL_PHYS)
-        _catSpecial = Await Get_Image_Async(URL_SPEC)
-        _catStatus = Await Get_Image_Async(URL_STAT)
+    Public Shared Async Sub Init_Cat_Images(settings As Settings, cache As IImageCache)
+        _catPhysical = Await Get_Image_Async(URL_PHYS, settings, cache)
+        _catSpecial = Await Get_Image_Async(URL_SPEC, settings, cache)
+        _catStatus = Await Get_Image_Async(URL_STAT, settings, cache)
     End Sub
 End Class

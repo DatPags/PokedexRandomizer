@@ -1,14 +1,13 @@
 ﻿Module UtilImage
-    Public Async Function Get_Image_Async(url As String, Optional useCache As Boolean = True) As Task(Of BitmapImage)
-        Dim cache As IImageCache = New AppDataLocalCache()
-        Dim cachedImage As BitmapImage = If(useCache, cache.GetImageIfExists(url), Nothing)
+    Public Async Function Get_Image_Async(url As String, settings As Settings, cache As IImageCache) As Task(Of BitmapImage)
+        Dim cachedImage As BitmapImage = If(cache IsNot Nothing AndAlso settings.UseCache, cache.GetImageIfExists(url), Nothing)
         If cachedImage Is Nothing Then
             Dim client As New System.Net.WebClient
             Dim uri As New Uri(url)
             Dim stream = Await client.OpenReadTaskAsync(uri)
             Dim image = System.Drawing.Image.FromStream(stream)
             cachedImage = Image_To_Image_Source(image)
-            If useCache Then cache.StoreImageInCache(cachedImage, url)
+            If cache IsNot Nothing AndAlso settings.UseCache Then cache.StoreImageInCache(cachedImage, url)
         End If
         Return cachedImage
     End Function
