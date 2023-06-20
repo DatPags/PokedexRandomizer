@@ -17,6 +17,7 @@ Public Class PokedexDisplay
         Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(1, GridUnitType.Star)})
         Me.Height = 80
         Me.Width = 80
+        Me.ToolTip = "#" + pkmn.pkmn.number.ToString("D4") + ": " + pkmn.pkmn.name
 
         Dim border As New Border With {
             .BorderThickness = New Thickness(2),

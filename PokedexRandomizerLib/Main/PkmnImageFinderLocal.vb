@@ -63,7 +63,7 @@ Public Class PkmnImageFinderLocal
         dict(0).Add(IMAGES_DIRECTORY_NAME, New List(Of String) From {"unknown.png"})
 
         ' icons
-        Dim tempDict = Await CreateImageArchiveFromHOMEDumpAsync(iconsDumpPath, iconsWorkingDir, infoFinder)
+        Dim tempDict = Await CreateImageArchiveFromSpriteDumpAsync(iconsDumpPath, iconsWorkingDir, infoFinder) ' Await CreateImageArchiveFromHOMEDumpAsync(iconsDumpPath, iconsWorkingDir, infoFinder)
         UpdateMainArchiveIndex(tempDict, dict, ICONS_DIRECTORY_NAME)
 
         ' images
@@ -113,6 +113,36 @@ Public Class PkmnImageFinderLocal
                     formIdx = 0
                 End If
                 Dim matches = files.Where(Function(s) Regex.IsMatch(s, $"poke_(icon|capture)_{number:D4}_{formIdx:D3}_[a-z]*?_n_[0-9]*?_f_n.png")).ToList()
+                If matches.Count <= 0 Then
+                    Debug.WriteLine("No matches found for " + pkmn.name + ", form: " + formName)
+                    Continue For
+                End If
+                Dim matchPath = matches(0)
+                Dim filename = Path.GetFileName(matchPath)
+                Dim newPath = IO.Path.Combine(workingDir, filename)
+                If Not IO.File.Exists(newPath) Then IO.File.Copy(matchPath, newPath)
+                newFilenames.Add(filename)
+                formIdx += 1
+            Next
+            dict(pkmnNumber) = newFilenames
+            If pkmn.forms.Count > newFilenames.Count And newFilenames.Count > 0 Then Debug.WriteLine("Missing full image list for " + pkmn.name)
+        Next
+        Return dict
+    End Function
+
+    Private Shared Async Function CreateImageArchiveFromSpriteDumpAsync(dumpPath As String, workingDir As String, infoFinder As IPkmnInfoFinder) As Task(Of Dictionary(Of Integer, List(Of String)))
+        Dim files = Directory.EnumerateFiles(dumpPath).ToList()
+        Dim dict As New Dictionary(Of Integer, List(Of String))
+        For pkmnNumber As Integer = 1 To infoFinder.GetTotalNumOfPkmn()
+            Dim number As Integer = pkmnNumber
+            Dim pkmn = Await infoFinder.GetPkmnInfoAsync(pkmnNumber)
+            Dim newFilenames As New List(Of String), formIdx As Integer = 0
+            For Each formName In pkmn.forms
+                If pkmn.number = 892 And formIdx = 1 Then
+                    '--manual fix for Urshifu
+                    formIdx = 0
+                End If
+                Dim matches = files.Where(Function(s) Regex.IsMatch(s, $"{number:D4}{If(formIdx > 0, "_" + formIdx.ToString("D2"), "")}.png")).ToList()
                 If matches.Count <= 0 Then
                     Debug.WriteLine("No matches found for " + pkmn.name + ", form: " + formName)
                     Continue For

@@ -1,8 +1,8 @@
 ﻿Imports System.Drawing
 Imports System.IO
-Imports System.Security.Cryptography
 Imports System.Net.Http
 Imports Newtonsoft.Json
+Imports SixLabors.ImageSharp.ImageExtensions
 
 Public Class Util
     Public Shared DIRECTORY_BASE As String = IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DatPags", "Pokedex Randomizer")
@@ -221,6 +221,25 @@ Public Class Util
 
         json = Await IO.File.ReadAllTextAsync(IO.Path.Combine(DIRECTORY_BASE, "gamecolormap.json"))
         _gameColorMap = JsonConvert.DeserializeObject(Of Dictionary(Of String, Color))(json)
+    End Function
+
+    Public Shared Async Function DownloadIconSprites(infoEngine As IPkmnInfoFinder) As Task
+        Dim url As String = "https://projectpokemon.org/images/sprites-models/sv-sprites-home/"
+        Dim path As String = IO.Path.Combine(DIRECTORY_BASE, "newicons")
+        CreateDirectory(path)
+        For number As Integer = 1 To infoEngine.GetTotalNumOfPkmn()
+            Dim info = Await infoEngine.GetPkmnInfoAsync(number)
+            For formIdx As Integer = 0 To info.forms.Count - 1
+                Try
+                    Dim imgName As String = number.ToString("D4") + If(formIdx > 0, "_" + formIdx.ToString("D2"), "") + ".png"
+                    Dim getFrom As String = url + imgName
+                    Dim img As SixLabors.ImageSharp.Image = Await UtilImage.GetImageFromUrlAsync(getFrom, Nothing, Nothing)
+                    Await img.SaveAsPngAsync(IO.Path.Combine(path, imgName))
+                Catch ex As Exception
+                    '--continue if not found
+                End Try
+            Next
+        Next
     End Function
 #End Region
 

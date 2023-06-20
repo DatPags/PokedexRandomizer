@@ -66,6 +66,7 @@ Class MainWindow
         ' initialize the model
         _numPkmnLabel.Content = "Initializing..."
         'Await Util.CreateDataArchiveAsync(_settings, False) '--uncomment to update the data archive
+        'Await Util.DownloadIconSprites(infoEngine) '--uncomment to update sprite dump
         If Await Util.DoesNewDataExist() Then
             Dim result = MessageBoxResult.Yes
             If Util.DoesDataExistOnSystem() Then
