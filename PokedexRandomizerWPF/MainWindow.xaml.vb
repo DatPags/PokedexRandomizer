@@ -63,7 +63,7 @@ Class MainWindow
 
         ' initialize the model
         _numPkmnLabel.Content = "Initializing..."
-        'Await Util.CreateDataArchive() '--uncomment to update the data archive
+        'Await Util.CreateDataArchive(False) '--uncomment to update the data archive
         Await Util.DownloadDataIfNotExists()
         Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderLocal.CreateSelf() ' PkmnInfoFinderPokemonDB.CreateSelf()
         Dim imageEngine As IPkmnImageFinder = Await PkmnImageFinderLocal.CreateSelf() ' Await PkmnImageFinderPokesprite.Create_Self()
