@@ -9,6 +9,12 @@ Public Class PkmnInfoFinderLocal
 
     Private data As Dictionary(Of Integer, PkmnInfo)
 
+    Public ReadOnly Property SupportsRapidLookup As Boolean Implements IPkmnInfoFinder.SupportsRapidLookup
+        Get
+            Return True
+        End Get
+    End Property
+
     Public Shared Async Function CreateSelfAsync() As Task(Of PkmnInfoFinderLocal)
         Dim obj As New PkmnInfoFinderLocal
         If Not IO.File.Exists(DATA_FILE) Then

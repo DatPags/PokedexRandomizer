@@ -1,4 +1,5 @@
 ﻿Public Interface IPkmnInfoFinder
+    ReadOnly Property SupportsRapidLookup As Boolean
     Function GetTotalNumOfPkmn() As Integer
     Function DoesPkmnExist(pkmnName As String) As Boolean
     Function DoesPkmnExist(pkmnNumber As Integer) As Boolean

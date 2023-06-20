@@ -13,6 +13,12 @@ Public Class PkmnInfoFinderPokemonDB
     Private _settings As Settings
     Private _cache As IPkmnInfoCache
 
+    Public ReadOnly Property SupportsRapidLookup As Boolean Implements IPkmnInfoFinder.SupportsRapidLookup
+        Get
+            Return False
+        End Get
+    End Property
+
 #Region "Structs"
     Private Structure UrlInfo
         Public name As String

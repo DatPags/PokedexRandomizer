@@ -9,6 +9,7 @@ Class MainWindow
     Private _pkmnInfoRetriever As PkmnInfoRetriever
     Private _settings As Settings
     Private _cache As AppDataLocalCache
+    Private _usePokedexImages As Boolean
 
     Private _ran As Random = New Random
     Private _displays(TOTAL_INFO) As PkmnDisplay
@@ -77,6 +78,10 @@ Class MainWindow
         RandomizeButton.IsEnabled = True
         MovesButton.IsEnabled = True
         ManualButton.IsEnabled = True
+        TabPokedex.Visibility = If(infoEngine.SupportsRapidLookup, Visibility.Visible, Visibility.Collapsed)
+        TabPokedex.IsEnabled = True
+        _usePokedexImages = imageEngine.SupportsRapidLookup
+        Await FillPokedex()
     End Sub
 
 #Region "UI Events"
@@ -186,6 +191,9 @@ Class MainWindow
             Case 2
                 ManualTop.Children.Remove(_numPkmnLabel)
                 ManualTop.Children.Remove(_skips)
+            Case 3
+                PokedexTop.Children.Remove(_numPkmnLabel)
+                PokedexTop.Children.Remove(_skips)
             Case Else
                 Throw New IndexOutOfRangeException("New tab is not yet handled")
         End Select
@@ -201,6 +209,9 @@ Class MainWindow
             Case 2
                 ManualTop.Children.Add(_numPkmnLabel)
                 ManualTop.Children.Add(_skips)
+            Case 3
+                PokedexTop.Children.Add(_numPkmnLabel)
+                PokedexTop.Children.Add(_skips)
             Case Else
                 Throw New IndexOutOfRangeException("New tab is not yet handled")
         End Select
@@ -226,6 +237,31 @@ Class MainWindow
         Dim result As Boolean = _cache.IPkmnInfoCache_ClearCache()
         result = result And _cache.IImageCache_ClearCache()
         MessageBox.Show(If(result, "Successfully cleared cache", "Something went wrong when trying to clear cache. Please try again later"), "Clear Cache", MessageBoxButton.OK)
+    End Sub
+
+    Private Sub PokedexDisplay_MouseDown(sender As Object, e As MouseButtonEventArgs)
+        If e.ClickCount >= 2 Then
+            LoadManualPkmnEntry(sender)
+        End If
+    End Sub
+
+    Private Sub PokedexDisplay_KeyDown(sender As Object, e As KeyEventArgs)
+        If e.Key = Key.Enter Then
+            LoadManualPkmnEntry(sender)
+        End If
+    End Sub
+
+    Private Sub DexListBox_KeyDown(sender As Object, e As KeyEventArgs)
+        If e.Key = Key.Enter And DexListBox.SelectedItem IsNot Nothing Then
+            LoadManualPkmnEntry(DexListBox.SelectedItem)
+        End If
+    End Sub
+
+    Private Sub LoadManualPkmnEntry(display As PokedexDisplay)
+        Dim number = display.PkmnNumber
+        ManualTextBox.Text = number.ToString
+        ManualButton_Click(ManualButton, New RoutedEventArgs())
+        TabsBase.SelectedIndex = 2
     End Sub
 #End Region
 
@@ -290,5 +326,15 @@ Class MainWindow
             MoveListBox.Items.Add(formMoves)
         Next
     End Sub
+
+    Private Async Function FillPokedex() As Task
+        DexListBox.Items.Clear()
+        For pkmnNumber As Integer = 1 To _pkmnInfoRetriever.GetTotalNumOfPkmn()
+            Dim pkmn = Await _pkmnInfoRetriever.GetPkmnAsync(pkmnNumber, _settings)
+            Dim display As New PokedexDisplay(pkmn, _usePokedexImages)
+            display.AddHandler(Grid.MouseLeftButtonDownEvent, New RoutedEventHandler(AddressOf PokedexDisplay_MouseDown))
+            DexListBox.Items.Add(display)
+        Next
+    End Function
 #End Region
 End Class
