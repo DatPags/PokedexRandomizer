@@ -66,9 +66,17 @@ Class MainWindow
         ' initialize the model
         _numPkmnLabel.Content = "Initializing..."
         'Await Util.CreateDataArchiveAsync(_settings, False) '--uncomment to update the data archive
-        Await Util.DownloadDataIfNotExistsAsync(New Progress(Of String)(Sub(prog)
-                                                                            _numPkmnLabel.Content = prog
-                                                                        End Sub))
+        If Await Util.DoesNewDataExist() Then
+            Dim result = MessageBoxResult.Yes
+            If Util.DoesDataExistOnSystem() Then
+                result = MessageBox.Show("New Pokemon data exists, would you like to download it?", "New Data", MessageBoxButton.YesNo)
+            End If
+            If result = MessageBoxResult.Yes Then
+                Await Util.DownloadData(New Progress(Of String)(Sub(prog)
+                                                                    _numPkmnLabel.Content = prog
+                                                                End Sub))
+            End If
+        End If
         _numPkmnLabel.Content = "Initializing..."
         _cache = New AppDataLocalCache()
         Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderLocal.CreateSelfAsync() ' PkmnInfoFinderPokemonDB.CreateSelfAsync(_settings, cache:=cache)

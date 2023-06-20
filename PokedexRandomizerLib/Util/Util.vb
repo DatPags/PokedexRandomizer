@@ -167,8 +167,7 @@ Public Class Util
         Await IO.File.WriteAllTextAsync(IO.Path.Combine(DIRECTORY_BASE, "working", "gamecolormap.json"), json)
     End Function
 
-    Public Shared Async Function DownloadDataIfNotExistsAsync(Optional pi As IProgress(Of String) = Nothing) As Task
-        '--exit if data already exists (saved hash exists and matches hash of remote data)
+    Public Shared Async Function DoesNewDataExist() As Task(Of Boolean)
         CreateDirectory(DIRECTORY_BASE)
         Dim hashPath As String = IO.Path.Combine(DIRECTORY_BASE, "hash.txt")
         If IO.File.Exists(hashPath) Then
@@ -176,10 +175,21 @@ Public Class Util
             Dim hashWeb As String = Await UtilWeb.GetTextFromUrlAsync(URL_HASH)
             If hash = hashWeb Then
                 Debug.WriteLine("Hash matches - data is up to date")
-                Return
+                Return False
+            Else
+                Return True
             End If
+        Else
+            Return True
         End If
+    End Function
 
+    Public Shared Function DoesDataExistOnSystem() As Boolean
+        Dim hashPath As String = IO.Path.Combine(DIRECTORY_BASE, "hash.txt")
+        Return IO.File.Exists(hashPath)
+    End Function
+
+    Public Shared Async Function DownloadData(Optional pi As IProgress(Of String) = Nothing) As Task
         '--download zip file
         Debug.WriteLine("Downloading data archive...")
         Dim bytes() = Await UtilWeb.GetBytesFromUrlAsync(URL_DATA, pi)
@@ -200,6 +210,7 @@ Public Class Util
         '--download and save the hash of the zip file
         Debug.WriteLine("Updating hash value...")
         Dim newHash As String = Await UtilWeb.GetTextFromUrlAsync(URL_HASH)
+        Dim hashPath As String = IO.Path.Combine(DIRECTORY_BASE, "hash.txt")
         Await IO.File.WriteAllTextAsync(hashPath, newHash)
         Debug.WriteLine("Hash value updated: " + newHash)
     End Function
