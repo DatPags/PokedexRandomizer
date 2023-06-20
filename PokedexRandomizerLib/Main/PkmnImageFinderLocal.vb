@@ -11,7 +11,12 @@ Public Class PkmnImageFinderLocal
     Private Shared IMAGES_DIRECTORY_BASE As String = IO.Path.Combine(Util.DIRECTORY_BASE, "images")
     Private Shared IMAGES_DIRECTORY_NAME As String = "images"
     Private Shared ICONS_DIRECTORY_NAME As String = "icons"
+    Private Shared MOVES_DIRECTORY_NAME As String = "moves"
+
     Private Const URL_IMG_UNKNOWN = "https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/unknown.png"
+    Private Const URL_IMG_PHYS = "https://img.pokemondb.net/images/icons/physical.png"
+    Private Const URL_IMG_SPEC = "https://img.pokemondb.net/images/icons/special.png"
+    Private Const URL_IMG_STAT = "https://img.pokemondb.net/images/icons/status.png"
 
     Private index As Dictionary(Of Integer, Dictionary(Of String, List(Of String)))
 
@@ -38,6 +43,8 @@ Public Class PkmnImageFinderLocal
         Util.CreateDirectory(iconsWorkingDir)
         Dim imagesWorkingDir = IO.Path.Combine(workingDir, "images", IMAGES_DIRECTORY_NAME)
         Util.CreateDirectory(imagesWorkingDir)
+        Dim movesWorkingDir = IO.Path.Combine(workingDir, "images", MOVES_DIRECTORY_NAME)
+        Util.CreateDirectory(movesWorkingDir)
         Dim dict As New Dictionary(Of Integer, Dictionary(Of String, List(Of String)))
         Dim infoFinder = Await PkmnInfoFinderLocal.CreateSelfAsync()
 
@@ -56,6 +63,14 @@ Public Class PkmnImageFinderLocal
         ' images
         tempDict = Await CreateImageArchiveFromHOMEDumpAsync(imagesDumpPath, imagesWorkingDir, infoFinder)
         UpdateMainArchiveIndex(tempDict, dict, IMAGES_DIRECTORY_NAME)
+
+        ' move types
+        img = Await UtilImage.GetImageFromUrlAsync(URL_IMG_PHYS, Nothing, Nothing)
+        Await img.SaveAsPngAsync(IO.Path.Combine(movesWorkingDir, "physical.png"))
+        img = Await UtilImage.GetImageFromUrlAsync(URL_IMG_SPEC, Nothing, Nothing)
+        Await img.SaveAsPngAsync(IO.Path.Combine(movesWorkingDir, "special.png"))
+        img = Await UtilImage.GetImageFromUrlAsync(URL_IMG_STAT, Nothing, Nothing)
+        Await img.SaveAsPngAsync(IO.Path.Combine(movesWorkingDir, "status.png"))
 
         Debug.WriteLine("Image archive creation completed")
         Dim json = JsonConvert.SerializeObject(dict)
@@ -131,6 +146,14 @@ Public Class PkmnImageFinderLocal
 
     Public Function GetPkmnImageURIList(pkmnInfo As PkmnInfo) As List(Of String) Implements IPkmnImageFinderURI.GetPkmnImageURIList
         Return GetPkmnImageUrisInternal(pkmnInfo, IMAGES_DIRECTORY_NAME)
+    End Function
+
+    Public Async Function GetMoveCategoryImageAsync(category As String) As Task(Of Image) Implements IPkmnImageFinder.GetMoveCategoryImageAsync
+        Return Await Image.LoadAsync(GetMoveCategoryURI(category))
+    End Function
+
+    Public Function GetMoveCategoryURI(category As String) As String Implements IPkmnImageFinderURI.GetMoveCategoryURI
+        Return IO.Path.Combine(IMAGES_DIRECTORY_BASE, MOVES_DIRECTORY_NAME, category.ToLower & ".png")
     End Function
 
     Private Function GetPkmnImageUrisInternal(pkmnInfo As PkmnInfo, directoryName As String) As List(Of String)

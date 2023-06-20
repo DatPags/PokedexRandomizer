@@ -71,4 +71,18 @@ Module ExtensionsWPF
             Return pkmn.images(formIndex).ToBitmapImage()
         End If
     End Function
+
+    <Extension()>
+    Public Function GetMoveCategoryImage(infoRetriever As PkmnInfoRetriever, category As String) As BitmapImage
+        Dim uri = infoRetriever.FetchMoveCategoryURI(category)
+        If uri Is Nothing Then
+            Return infoRetriever.FetchMoveCategoryImage(category).ToBitmapImage()
+        Else
+            Dim newImg As New BitmapImage
+            newImg.BeginInit()
+            newImg.UriSource = New Uri(uri)
+            newImg.EndInit()
+            Return newImg
+        End If
+    End Function
 End Module

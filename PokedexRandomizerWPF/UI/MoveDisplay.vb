@@ -1,14 +1,6 @@
 ﻿Imports PokedexRandomizerLib
 
 Public Class MoveDisplay : Inherits Grid
-    Private Const URL_PHYS = "https://img.pokemondb.net/images/icons/physical.png"
-    Private Const URL_SPEC = "https://img.pokemondb.net/images/icons/special.png"
-    Private Const URL_STAT = "https://img.pokemondb.net/images/icons/status.png"
-
-    Private Shared _catPhysical As SixLabors.ImageSharp.Image
-    Private Shared _catStatus As SixLabors.ImageSharp.Image
-    Private Shared _catSpecial As SixLabors.ImageSharp.Image
-
     Private _nameText As Label
     Private _typeText As TextBox
     Private _category As Image
@@ -17,6 +9,7 @@ Public Class MoveDisplay : Inherits Grid
     Private _powerText As Label
     Private _accVal As String
     Private _accText As Label
+    Private _infoRetriever As PkmnInfoRetriever
 
     Public Property MoveName() As String
         Get
@@ -41,14 +34,8 @@ Public Class MoveDisplay : Inherits Grid
             Return _catText
         End Get
         Set(value As String)
-            Select Case value
-                Case "Physical"
-                    _category.Source = _catPhysical.ToBitmapImage
-                Case "Special"
-                    _category.Source = _catSpecial.ToBitmapImage
-                Case "Status"
-                    _category.Source = _catStatus.ToBitmapImage
-            End Select
+            _catText = value
+            _category.Source = _infoRetriever.GetMoveCategoryImage(value.ToLower)
         End Set
     End Property
 
@@ -83,12 +70,13 @@ Public Class MoveDisplay : Inherits Grid
         End Get
     End Property
 
-    Public Sub New(pkmnInfo As MoveInfo)
-        Me.New(pkmnInfo.name, pkmnInfo.type, pkmnInfo.category, pkmnInfo.power, pkmnInfo.accuracy)
+    Public Sub New(pkmnInfo As MoveInfo, infoRetriever As PkmnInfoRetriever)
+        Me.New(pkmnInfo.name, pkmnInfo.type, pkmnInfo.category, pkmnInfo.power, pkmnInfo.accuracy, infoRetriever)
     End Sub
 
     Public Sub New(Optional name As String = "", Optional type As String = "", Optional category As String = "Physical",
-                   Optional power As String = "", Optional acc As String = "")
+                   Optional power As String = "", Optional acc As String = "", Optional infoRetriever As PkmnInfoRetriever = Nothing)
+        _infoRetriever = infoRetriever
         Me.Background = New SolidColorBrush(ColorConverter.ConvertFromString("#FFF0F0F0"))
         Me.Margin = New Thickness(5, 5, 5, 5)
         Me.ColumnDefinitions.Add(New ColumnDefinition With {.Width = New GridLength(3, GridUnitType.Star)})
@@ -136,11 +124,5 @@ Public Class MoveDisplay : Inherits Grid
         Me.Children.Add(_powerText)
         Grid.SetColumn(_accText, 4)
         Me.Children.Add(_accText)
-    End Sub
-
-    Public Shared Async Sub LoadMoveCategoryImagesAsync(settings As Settings, cache As IImageCache)
-        _catPhysical = Await UtilImage.GetImageFromUrlAsync(URL_PHYS, settings, cache)
-        _catSpecial = Await UtilImage.GetImageFromUrlAsync(URL_SPEC, settings, cache)
-        _catStatus = Await UtilImage.GetImageFromUrlAsync(URL_STAT, settings, cache)
     End Sub
 End Class

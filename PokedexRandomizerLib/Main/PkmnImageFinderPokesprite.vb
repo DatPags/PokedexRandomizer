@@ -9,6 +9,10 @@ Public Class PkmnImageFinderPokesprite
     Private Const URL_IMG_UNKNOWN = "https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/unknown.png"
     Private Const URL_IMG_JSON = "https://raw.githubusercontent.com/msikma/pokesprite/master/data/pokemon.json"
 
+    Private Const URL_IMG_PHYS = "https://img.pokemondb.net/images/icons/physical.png"
+    Private Const URL_IMG_SPEC = "https://img.pokemondb.net/images/icons/special.png"
+    Private Const URL_IMG_STAT = "https://img.pokemondb.net/images/icons/status.png"
+
     Private _imageJson As Newtonsoft.Json.Linq.JObject
 
     Private _settings As Settings
@@ -238,5 +242,18 @@ Public Class PkmnImageFinderPokesprite
 
     Private Async Function GetUnknownImageAsync() As Task(Of Image)
         Return Await UtilImage.GetImageFromUrlAsync(URL_IMG_UNKNOWN, _settings, _cache)
+    End Function
+
+    Public Async Function GetMoveCategoryImageAsync(category As String) As Task(Of Image) Implements IPkmnImageFinder.GetMoveCategoryImageAsync
+        Select Case category.ToLower
+            Case "physical"
+                Return Await UtilImage.GetImageFromUrlAsync(URL_IMG_PHYS, _settings, _cache)
+            Case "special"
+                Return Await UtilImage.GetImageFromUrlAsync(URL_IMG_SPEC, _settings, _cache)
+            Case "status"
+                Return Await UtilImage.GetImageFromUrlAsync(URL_IMG_STAT, _settings, _cache)
+            Case Else
+                Return Nothing
+        End Select
     End Function
 End Class
