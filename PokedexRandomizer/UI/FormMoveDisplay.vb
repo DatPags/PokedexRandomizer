@@ -57,7 +57,7 @@
         End Get
         Set(ByVal value As List(Of MoveInfo))
             _moveList = value
-            Update_Moves()
+            UpdateMoves()
         End Set
     End Property
 
@@ -124,7 +124,7 @@
         Me.PkmnMoveList = randomMoves
     End Sub
 
-    Private Sub Update_Moves()
+    Private Sub UpdateMoves()
         For Each moveDisplay In _moveDisplayList
             Me.Children.Remove(moveDisplay)
         Next

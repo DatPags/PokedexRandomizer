@@ -61,12 +61,12 @@
 
         ' initialize the model
         _numPkmnLabel.Content = "Initializing..."
-        Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderPokemonDB.Create_Self()
+        Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderPokemonDB.CreateSelf()
         Dim imageEngine As IPkmnImageFinder = Await PkmnImageFinderPokesprite.Create_Self()
         Dim cache As New AppDataLocalCache()
         _pkmnInfoRetriever = New PkmnInfoRetriever(infoEngine, imageEngine, infoCache:=cache, imageCache:=cache)
-        _numPkmnLabel.Content = "Total number of Pokémon: " & _pkmnInfoRetriever.Total_Number_Of_Pokemon().ToString
-        MoveDisplay.Init_Cat_Images(_settings, cache)
+        _numPkmnLabel.Content = "Total number of Pokémon: " & _pkmnInfoRetriever.GetTotalNumOfPkmn().ToString
+        MoveDisplay.LoadMoveCategoryImagesAsync(_settings, cache)
 
         RandomizeButton.IsEnabled = True
         MovesButton.IsEnabled = True
@@ -76,11 +76,11 @@
 #Region "UI Events"
     Private Async Sub RandomizeButton_Click(sender As Object, e As RoutedEventArgs) Handles RandomizeButton.Click
         RandomizeButton.IsEnabled = False
-        Reset_Pkmn_Columns(MAX_COLS - 1)
+        ResetPkmnColumns(MAX_COLS - 1)
 
         Dim randomNumbers As New List(Of Integer)
         Do
-            Dim number = _ran.Next(maxValue:=_pkmnInfoRetriever.Total_Number_Of_Pokemon())
+            Dim number = _ran.Next(maxValue:=_pkmnInfoRetriever.GetTotalNumOfPkmn())
             If Not randomNumbers.Contains(number) Then
                 randomNumbers.Add(number)
             End If
@@ -88,14 +88,14 @@
 
         Dim tasks As New List(Of Task(Of Pkmn))
         For index = 0 To NumberCombobox.SelectedIndex
-            tasks.Add(_pkmnInfoRetriever.Get_Pkmn_Info(randomNumbers(index) + 1, _settings))
-            _displays(index).Set_Loading()
+            tasks.Add(_pkmnInfoRetriever.GetPkmnAsync(randomNumbers(index) + 1, _settings))
+            _displays(index).SetLoading()
         Next
 
         Dim listIndex = 0
         For Each pkmnInfo In Await Task.WhenAll(tasks)
-            Dim form_game_index = _pkmnInfoRetriever.Random_Entry(pkmnInfo, _settings)
-            _displays(listIndex).Populate_Display(pkmnInfo, form_game_index(0), form_game_index(1), form_game_index(2))
+            Dim form_game_index = _pkmnInfoRetriever.SelectRandomEntry(pkmnInfo, _settings)
+            _displays(listIndex).PopulateDisplay(pkmnInfo, form_game_index(0), form_game_index(1), form_game_index(2))
             listIndex += 1
         Next
 
@@ -104,42 +104,42 @@
 
     Private Async Sub ManualButton_Click(sender As Object, e As RoutedEventArgs) Handles ManualButton.Click
         ManualButton.IsEnabled = False
-        Reset_Pkmn_Columns(MANUAL_IDX, MANUAL_IDX)
+        ResetPkmnColumns(MANUAL_IDX, MANUAL_IDX)
         EntryListBox.Items.Clear()
         FormListBox.Items.Clear()
 
         Dim pkmnNum As Integer, result As String = ""
-        If Not _pkmnInfoRetriever.Validate_Search(ManualTextBox.Text.Trim, pkmnNum, result) Then
-            _displays(MANUAL_IDX).Set_Text(result)
+        If Not _pkmnInfoRetriever.ValidateSearch(ManualTextBox.Text.Trim, pkmnNum, result) Then
+            _displays(MANUAL_IDX).SetText(result)
             ManualButton.IsEnabled = True
             Exit Sub
         End If
 
-        _displays(MANUAL_IDX).Set_Loading()
-        Dim pkmnInfo = Await _pkmnInfoRetriever.Get_Pkmn_Info(pkmnNum, _settings)
-        _displays(MANUAL_IDX).Populate_Display(pkmnInfo, 0, 0, 0)
-        Fill_Entry_List(pkmnInfo)
-        Fill_Form_List(pkmnInfo)
+        _displays(MANUAL_IDX).SetLoading()
+        Dim pkmnInfo = Await _pkmnInfoRetriever.GetPkmnAsync(pkmnNum, _settings)
+        _displays(MANUAL_IDX).PopulateDisplay(pkmnInfo, 0, 0, 0)
+        FillEntryList(pkmnInfo)
+        FillFormList(pkmnInfo)
 
         ManualButton.IsEnabled = True
     End Sub
 
     Private Async Sub MovesButton_Click(sender As Object, e As RoutedEventArgs) Handles MovesButton.Click
         MovesButton.IsEnabled = False
-        Reset_Pkmn_Columns(MOVES_IDX, MOVES_IDX)
+        ResetPkmnColumns(MOVES_IDX, MOVES_IDX)
         MoveListBox.Items.Clear()
 
         Dim pkmnNum As Integer, result As String = ""
-        If Not _pkmnInfoRetriever.Validate_Search(MovesTextBox.Text.Trim, pkmnNum, result) Then
-            _displays(MOVES_IDX).Set_Text(result)
+        If Not _pkmnInfoRetriever.ValidateSearch(MovesTextBox.Text.Trim, pkmnNum, result) Then
+            _displays(MOVES_IDX).SetText(result)
             MovesButton.IsEnabled = True
             Exit Sub
         End If
 
-        _displays(MOVES_IDX).Set_Loading()
-        Dim pkmnInfo = Await _pkmnInfoRetriever.Get_Pkmn_Info(pkmnNum, _settings)
-        _displays(MOVES_IDX).Populate_Display(pkmnInfo, 0, 0, 0)
-        Fill_Move_List(pkmnInfo)
+        _displays(MOVES_IDX).SetLoading()
+        Dim pkmnInfo = Await _pkmnInfoRetriever.GetPkmnAsync(pkmnNum, _settings)
+        _displays(MOVES_IDX).PopulateDisplay(pkmnInfo, 0, 0, 0)
+        FillMoveList(pkmnInfo)
 
         MovesButton.IsEnabled = True
     End Sub
@@ -151,7 +151,7 @@
                 Dim formMoves As FormMoveDisplay = MoveListBox.Items.GetItemAt(formIndex)
                 Dim abilityList = pkmnInfo.pkmn.abilities(pkmnInfo.pkmn.forms.IndexOf(pkmnInfo.pkmn.moveForms(formIndex)))
                 formMoves.PkmnAbility = abilityList(_ran.Next(abilityList.Count))
-                formMoves.PkmnMoveList = _pkmnInfoRetriever.Generate_Random_Moves(pkmnInfo.pkmn.moves(formIndex))
+                formMoves.PkmnMoveList = _pkmnInfoRetriever.PickRandomMoves(pkmnInfo.pkmn.moves(formIndex))
             Next
         End If
     End Sub
@@ -223,25 +223,25 @@
 #End Region
 
 #Region "Pkmn Columns"
-    Private Sub Reset_Pkmn_Columns()
-        Reset_Pkmn_Columns(0, TOTAL_INFO)
+    Private Sub ResetPkmnColumns()
+        ResetPkmnColumns(0, TOTAL_INFO)
     End Sub
 
-    Private Sub Reset_Pkmn_Columns(maxCol As Integer)
-        Reset_Pkmn_Columns(0, maxCol)
+    Private Sub ResetPkmnColumns(maxCol As Integer)
+        ResetPkmnColumns(0, maxCol)
     End Sub
 
-    Private Sub Reset_Pkmn_Columns(minCol As Integer, maxCol As Integer)
+    Private Sub ResetPkmnColumns(minCol As Integer, maxCol As Integer)
         For index = minCol To maxCol
-            _displays(index).Clear_Display()
+            _displays(index).ClearDisplay()
         Next
     End Sub
 #End Region
 
 #Region "Fill Listboxes"
-    Private Sub Fill_Entry_List(pkmnInfo As Pkmn)
-        For entryIndex = 0 To pkmnInfo.pkmn.games.Count - 1
-            Dim entryDisplay = New EntryDisplay(pkmnInfo.pkmn.games(entryIndex), pkmnInfo.pkmn.entries(entryIndex))
+    Private Sub FillEntryList(pkmn As Pkmn)
+        For entryIndex = 0 To pkmn.pkmn.games.Count - 1
+            Dim entryDisplay = New EntryDisplay(pkmn.pkmn.games(entryIndex), pkmn.pkmn.entries(entryIndex))
             If entryIndex Mod 2 = 0 Then
                 entryDisplay.BackgroundColor = "#FFFFFFFF"
             Else
@@ -251,25 +251,25 @@
         Next
     End Sub
 
-    Private Sub Fill_Form_List(pkmnInfo As Pkmn)
-        For formIndex = 0 To pkmnInfo.pkmn.forms.Count - 1
-            FormListBox.Items.Add(New FormDisplay(pkmnInfo.images(formIndex), pkmnInfo.pkmn.forms(formIndex)))
+    Private Sub FillFormList(pkmn As Pkmn)
+        For formIndex = 0 To pkmn.pkmn.forms.Count - 1
+            FormListBox.Items.Add(New FormDisplay(pkmn.images(formIndex), pkmn.pkmn.forms(formIndex)))
         Next
     End Sub
 
-    Private Sub Fill_Move_List(pkmnInfo As Pkmn)
-        For formIndex = 0 To pkmnInfo.pkmn.moveForms.Count - 1
+    Private Sub FillMoveList(pkmn As Pkmn)
+        For formIndex = 0 To pkmn.pkmn.moveForms.Count - 1
             Dim im As BitmapImage
             Dim abilityList As List(Of String)
-            If pkmnInfo.pkmn.forms.Contains(pkmnInfo.pkmn.moveForms(formIndex)) Then
-                im = pkmnInfo.images(pkmnInfo.pkmn.forms.IndexOf(pkmnInfo.pkmn.moveForms(formIndex)))
-                abilityList = pkmnInfo.pkmn.abilities(pkmnInfo.pkmn.forms.IndexOf(pkmnInfo.pkmn.moveForms(formIndex)))
+            If pkmn.pkmn.forms.Contains(pkmn.pkmn.moveForms(formIndex)) Then
+                im = pkmn.images(pkmn.pkmn.forms.IndexOf(pkmn.pkmn.moveForms(formIndex)))
+                abilityList = pkmn.pkmn.abilities(pkmn.pkmn.forms.IndexOf(pkmn.pkmn.moveForms(formIndex)))
             Else
-                im = pkmnInfo.images(0)
-                abilityList = pkmnInfo.pkmn.abilities(0)
+                im = pkmn.images(0)
+                abilityList = pkmn.pkmn.abilities(0)
             End If
-            Dim formName = pkmnInfo.pkmn.moveForms(formIndex)
-            Dim randomMoves = _pkmnInfoRetriever.Generate_Random_Moves(pkmnInfo.pkmn.moves(formIndex))
+            Dim formName = pkmn.pkmn.moveForms(formIndex)
+            Dim randomMoves = _pkmnInfoRetriever.PickRandomMoves(pkmn.pkmn.moves(formIndex))
             Dim ability = abilityList(_ran.Next(abilityList.Count))
             Dim formMoves = New FormMoveDisplay(im, formName, ability, randomMoves)
 

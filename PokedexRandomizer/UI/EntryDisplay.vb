@@ -24,7 +24,7 @@
                 If part.StartsWith("(") Then
                     _gameText.Inlines.Add(New Run(part))
                 Else
-                    _gameText.Inlines.Add(New Run(part) With {.Foreground = Get_Game_Color(part.Trim)})
+                    _gameText.Inlines.Add(New Run(part) With {.Foreground = GetPkmnGameColor(part.Trim)})
                 End If
                 If partIdx <= lastComma Then
                     _gameText.Inlines.Add(New Run(","))

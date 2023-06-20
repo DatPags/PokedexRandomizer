@@ -49,7 +49,7 @@
             .VerticalAlignment = VerticalAlignment.Center,
             .Margin = New Thickness(5, 0, 5, 0)
         }
-        _forms.AddHandler(ComboBox.SelectionChangedEvent, New RoutedEventHandler(AddressOf Form_Change))
+        _forms.AddHandler(ComboBox.SelectionChangedEvent, New RoutedEventHandler(AddressOf FormChange))
 
         _class = New TextBox With {
             .VerticalAlignment = VerticalAlignment.Center,
@@ -114,7 +114,7 @@
             .VerticalAlignment = VerticalAlignment.Center,
             .Margin = New Thickness(5, 0, 5, 0)
         }
-        _games.AddHandler(ComboBox.SelectionChangedEvent, New RoutedEventHandler(AddressOf Game_Change))
+        _games.AddHandler(ComboBox.SelectionChangedEvent, New RoutedEventHandler(AddressOf GameChange))
 
         Dim entryBorder = New Border With {
             .BorderThickness = New Thickness(1),
@@ -150,16 +150,16 @@
         Me.Children.Add(entryBorder)
     End Sub
 
-    Public Sub Set_Loading()
-        Set_Text("Loading...")
+    Public Sub SetLoading()
+        SetText("Loading...")
     End Sub
 
-    Public Sub Set_Text(text As String)
-        Clear_Display()
+    Public Sub SetText(text As String)
+        ClearDisplay()
         _name.Text = text
     End Sub
 
-    Public Sub Populate_Display(pkmnInfo As Pkmn, formIndex As Integer, gameIndex As Integer, abilityIndex As Integer)
+    Public Sub PopulateDisplay(pkmnInfo As Pkmn, formIndex As Integer, gameIndex As Integer, abilityIndex As Integer)
         _pkmnInfo = pkmnInfo
 
         _name.Text = $"#{_pkmnInfo.pkmn.number} - {_pkmnInfo.pkmn.name}"
@@ -181,15 +181,15 @@
         _abilities.SelectedIndex = abilityIndex
     End Sub
 
-    Public Sub Clear_Display()
+    Public Sub ClearDisplay()
         _image.Source = Nothing
         _name.Text = ""
         _forms.ItemsSource = Nothing
         _class.Text = ""
         _type1.Text = ""
-        _type1.Background = Get_Type_Color("")
+        _type1.Background = GetPkmnTypeColor("")
         _type2.Text = ""
-        _type2.Background = Get_Type_Color("")
+        _type2.Background = GetPkmnTypeColor("")
         _height.Text = ""
         _weight.Text = ""
         _abilities.ItemsSource = Nothing
@@ -198,15 +198,15 @@
         _pkmnInfo = Nothing
     End Sub
 
-    Private Sub Form_Change(sender As Object, e As SelectionChangedEventArgs)
+    Private Sub FormChange(sender As Object, e As SelectionChangedEventArgs)
         Dim formIndex As Integer = _forms.SelectedIndex
         If formIndex >= 0 Then
             _image.Source = _pkmnInfo.images(formIndex)
             _class.Text = _pkmnInfo.pkmn.species(formIndex)
             _type1.Text = _pkmnInfo.pkmn.types(formIndex)(0)
-            _type1.Background = Get_Type_Color(_pkmnInfo.pkmn.types(formIndex)(0))
+            _type1.Background = GetPkmnTypeColor(_pkmnInfo.pkmn.types(formIndex)(0))
             _type2.Text = _pkmnInfo.pkmn.types(formIndex)(1)
-            _type2.Background = Get_Type_Color(_pkmnInfo.pkmn.types(formIndex)(1))
+            _type2.Background = GetPkmnTypeColor(_pkmnInfo.pkmn.types(formIndex)(1))
             _height.Text = _pkmnInfo.pkmn.height(formIndex)
             _weight.Text = _pkmnInfo.pkmn.weight(formIndex)
             _abilities.ItemsSource = _pkmnInfo.pkmn.abilities(formIndex)
@@ -214,7 +214,7 @@
         End If
     End Sub
 
-    Private Sub Game_Change(sender As Object, e As SelectionChangedEventArgs)
+    Private Sub GameChange(sender As Object, e As SelectionChangedEventArgs)
         Dim gameIndex As Integer = _games.SelectedIndex
         If gameIndex >= 0 Then
             _entry.Text = _pkmnInfo.pkmn.entries(gameIndex)

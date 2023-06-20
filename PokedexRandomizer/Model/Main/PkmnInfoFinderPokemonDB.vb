@@ -89,52 +89,52 @@
     End Structure
 #End Region
 
-    Public Shared Async Function Create_Self() As Task(Of IPkmnInfoFinder)
+    Public Shared Async Function CreateSelf() As Task(Of IPkmnInfoFinder)
         Dim obj = New PkmnInfoFinderPokemonDB
-        obj._urlList = Await obj.Url_List()
-        obj.Build_Name_Map()
+        obj._urlList = Await obj.GetUrlListAsync()
+        obj.BuildNameMap()
         Return obj
     End Function
 
-    Public Function Total_Number_Of_Pokemon() As Integer Implements IPkmnInfoFinder.Total_Number_Of_Pokemon
+    Public Function GetTotalNumOfPkmn() As Integer Implements IPkmnInfoFinder.GetTotalNumOfPkmn
         Return _urlList.Count
     End Function
 
-    Public Function Pkmn_Exists_By_Name(name As String) As Boolean Implements IPkmnInfoFinder.Pkmn_Exists_By_Name
-        Return _urlNameMap.ContainsKey(name.ToLower)
+    Public Function DoesPkmnExist(pkmnName As String) As Boolean Implements IPkmnInfoFinder.DoesPkmnExist
+        Return _urlNameMap.ContainsKey(pkmnName.ToLower)
     End Function
 
-    Public Function Pkmn_Exists_By_Num(num As Integer) As Boolean Implements IPkmnInfoFinder.Pkmn_Exists_By_Num
-        Return num > 0 And num <= Total_Number_Of_Pokemon()
+    Public Function DoesPkmnExist(pkmnNumber As Integer) As Boolean Implements IPkmnInfoFinder.DoesPkmnExist
+        Return pkmnNumber > 0 And pkmnNumber <= GetTotalNumOfPkmn()
     End Function
 
-    Public Function Pkmn_Name_To_Number(name As String) As Integer Implements IPkmnInfoFinder.Pkmn_Name_To_Number
-        Return _urlNameMap(name.ToLower).number
+    Public Function PkmnNameToNumber(pkmnName As String) As Integer Implements IPkmnInfoFinder.PkmnNameToNumber
+        Return _urlNameMap(pkmnName.ToLower).number
     End Function
 
-    Public Async Function Get_Pkmn_Info(num As Integer) As Task(Of PkmnInfo) Implements IPkmnInfoFinder.Get_Pkmn_Info
-        Dim url As String = _urlList(num - 1).url
+    Public Async Function GetPkmnInfoAsync(pkmnNumber As Integer) As Task(Of PkmnInfo) Implements IPkmnInfoFinder.GetPkmnInfoAsync
+        Dim url As String = _urlList(pkmnNumber - 1).url
 
-        Dim html = Await Load_Html_Async(URL_BASE & url)
-        Dim data = New_GatherInfoData(num)
-        Parse_Html_Pkmn_Info(html, data)
-        data.heights = Decode_Html_String_List(data.heights)
-        Dim pkmnInfo As PkmnInfo = Load_Info_Into_PkmnInfo(data)
+        Dim html = Await GetHtmlAsync(URL_BASE & url)
+        Dim data = New_GatherInfoData(pkmnNumber)
+        ParseHtmlIntoGatherInfoData(html, data)
+        data.heights = DecodeHtmlStringList(data.heights)
+        Dim pkmnInfo As PkmnInfo = LoadGatherInfoDataIntoPkmnInfo(data)
 
-        Dim moveData = New_GatherMovesData(num)
-        Parse_Html_Moves(html, moveData)
-        Remove_Duplicates(moveData.moves)
-        Condense_Move_Lists(moveData)
+        Dim moveData = New_GatherMovesData(pkmnNumber)
+        ParseHtmlIntoGatherMovesData(html, moveData)
+        RemoveDuplicateMoves(moveData.moves)
+        CondenseMoveLists(moveData)
         pkmnInfo.moveForms = moveData.forms
         pkmnInfo.moves = moveData.moves
 
         Return pkmnInfo
     End Function
 
-    Private Async Function Url_List() As Task(Of List(Of UrlInfo))
-        Dim html = Await Load_Html_Async(URL_BASE & URL_NATDEX)
+    Private Async Function GetUrlListAsync() As Task(Of List(Of UrlInfo))
+        Dim html = Await GetHtmlAsync(URL_BASE & URL_NATDEX)
         Dim data = New_UrlMapData()
-        Parse_Html_Url_List(html, data)
+        ParseHtmlIntoUrlMapData(html, data)
         Dim urlInfoList = New List(Of UrlInfo)
         For urlIndex = 0 To data.count - 1
             urlInfoList.Add(New UrlInfo With {.number = urlIndex + 1, .name = data.names(urlIndex), .url = data.urls(urlIndex)})
@@ -142,7 +142,7 @@
         Return urlInfoList
     End Function
 
-    Private Sub Build_Name_Map()
+    Private Sub BuildNameMap()
         _urlNameMap = New Dictionary(Of String, UrlInfo)
         For Each urlInfo In _urlList
             _urlNameMap.Add(urlInfo.name.ToLower, urlInfo)
@@ -236,7 +236,7 @@
             .tempMove = Nothing}
     End Function
 
-    Private Function Load_Info_Into_PkmnInfo(data As GatherInfoData) As PkmnInfo
+    Private Function LoadGatherInfoDataIntoPkmnInfo(data As GatherInfoData) As PkmnInfo
         Return New PkmnInfo With {.number = data.number, .name = data.name, .forms = data.forms,
             .species = data.classifications, .types = data.types, .height = data.heights, .weight = data.weights,
             .games = data.games, .entries = data.entries,
@@ -246,13 +246,13 @@
 #End Region
 
 #Region "Parse Url List"
-    Private Sub Parse_Html_Url_List(html As HtmlAgilityPack.HtmlDocument, ByRef data As UrlMapData)
+    Private Sub ParseHtmlIntoUrlMapData(html As HtmlAgilityPack.HtmlDocument, ByRef data As UrlMapData)
         For Each node As HtmlAgilityPack.HtmlNode In html.DocumentNode.ChildNodes
-            Check_Url_List_Node(node, data, 0)
+            ParseHtmlNodeUrlMapDataRecursive(node, data, 0)
         Next
     End Sub
 
-    Private Sub Check_Url_List_Node(node As HtmlAgilityPack.HtmlNode, ByRef data As UrlMapData, depth As Integer)
+    Private Sub ParseHtmlNodeUrlMapDataRecursive(node As HtmlAgilityPack.HtmlNode, ByRef data As UrlMapData, depth As Integer)
         For Each childNode In node.ChildNodes
             Dim name = childNode.Name.Trim
 
@@ -298,20 +298,20 @@
             End If
 
             If childNode.HasChildNodes Then
-                Check_Url_List_Node(childNode, data, depth + 1)
+                ParseHtmlNodeUrlMapDataRecursive(childNode, data, depth + 1)
             End If
         Next
     End Sub
 #End Region
 
 #Region "Parse Pkmn Info"
-    Private Sub Parse_Html_Pkmn_Info(html As HtmlAgilityPack.HtmlDocument, ByRef data As GatherInfoData)
+    Private Sub ParseHtmlIntoGatherInfoData(html As HtmlAgilityPack.HtmlDocument, ByRef data As GatherInfoData)
         For Each node As HtmlAgilityPack.HtmlNode In html.DocumentNode.ChildNodes
-            Check_Pkmn_Info_Node(node, data, 0)
+            ParseHtmlNodeGatherInfoDataRecursive(node, data, 0)
         Next
     End Sub
 
-    Private Sub Check_Pkmn_Info_Node(node As HtmlAgilityPack.HtmlNode, ByRef data As GatherInfoData, depth As Integer)
+    Private Sub ParseHtmlNodeGatherInfoDataRecursive(node As HtmlAgilityPack.HtmlNode, ByRef data As GatherInfoData, depth As Integer)
         For Each childNode In node.ChildNodes
             Dim name = childNode.Name.Trim
 
@@ -457,20 +457,20 @@
             End If
 
             If childNode.HasChildNodes Then
-                Check_Pkmn_Info_Node(childNode, data, depth + 1)
+                ParseHtmlNodeGatherInfoDataRecursive(childNode, data, depth + 1)
             End If
         Next
     End Sub
 #End Region
 
 #Region "Parse Pkmn Moves"
-    Private Sub Parse_Html_Moves(html As HtmlAgilityPack.HtmlDocument, ByRef data As GatherMovesData)
+    Private Sub ParseHtmlIntoGatherMovesData(html As HtmlAgilityPack.HtmlDocument, ByRef data As GatherMovesData)
         For Each node As HtmlAgilityPack.HtmlNode In html.DocumentNode.ChildNodes
-            Check_Pkmn_Moves_Node(node, data, 0)
+            ParseHtmlNodeGatherMovesDataRecursive(node, data, 0)
         Next
     End Sub
 
-    Private Sub Check_Pkmn_Moves_Node(node As HtmlAgilityPack.HtmlNode, ByRef data As GatherMovesData, depth As Integer)
+    Private Sub ParseHtmlNodeGatherMovesDataRecursive(node As HtmlAgilityPack.HtmlNode, ByRef data As GatherMovesData, depth As Integer)
         For Each childNode In node.ChildNodes
             Dim name = childNode.Name.Trim
 
@@ -620,7 +620,7 @@
                         Case 3
                             data.tempMove.power = text
                         Case 2
-                            data.tempMove.accuracy = Decode_Html_String(text)
+                            data.tempMove.accuracy = DecodeHtmlString(text)
                             If data.addMoveToAll Then
                                 For formIndex = 0 To data.forms.Count - 1
                                     data.moves(formIndex).Add(data.tempMove)
@@ -634,14 +634,14 @@
             End If
 
             If childNode.HasChildNodes Then
-                Check_Pkmn_Moves_Node(childNode, data, depth + 1)
+                ParseHtmlNodeGatherMovesDataRecursive(childNode, data, depth + 1)
             End If
         Next
     End Sub
 #End Region
 
 #Region "Moves Utilities"
-    Private Sub Remove_Duplicates(ByRef moves As List(Of List(Of MoveInfo)))
+    Private Sub RemoveDuplicateMoves(ByRef moves As List(Of List(Of MoveInfo)))
         For formIndex = 0 To moves.Count - 1
             Dim newList = New List(Of MoveInfo)
             For Each move In moves(formIndex)
@@ -661,7 +661,7 @@
         Next
     End Sub
 
-    Private Sub Condense_Move_Lists(ByRef data As GatherMovesData)
+    Private Sub CondenseMoveLists(ByRef data As GatherMovesData)
         If Not data.formMovesExist Then
             data.forms = New List(Of String) From {{data.forms(0)}}
             data.moves = New List(Of List(Of MoveInfo)) From {{data.moves(0)}}

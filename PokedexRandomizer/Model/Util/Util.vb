@@ -58,7 +58,7 @@
         {"Scarlet", New SolidColorBrush(ColorConverter.ConvertFromString("#FFC92127"))},
         {"Violet", New SolidColorBrush(ColorConverter.ConvertFromString("#FF8B2E8B"))}}
 
-    Public Function Get_Type_Color(typeName As String) As Brush
+    Public Function GetPkmnTypeColor(typeName As String) As Brush
         If _typeColorMap.ContainsKey(typeName) Then
             Return _typeColorMap(typeName)
         Else
@@ -66,7 +66,7 @@
         End If
     End Function
 
-    Public Function Get_Game_Color(gameName As String) As Brush
+    Public Function GetPkmnGameColor(gameName As String) As Brush
         Dim firstCommaIndex = gameName.IndexOf(",")
         Dim firstParenIndex = gameName.IndexOf("(")
         Dim firstGame As String
@@ -94,7 +94,7 @@
         Public UInt32 As UInteger
     End Structure
 
-    Public Function Int32_To_UInt32(i As Integer) As UInteger
+    Public Function IntegerToUInteger(i As Integer) As UInteger
         Dim u As New Int32Union With {.Int32 = i}
         Return u.UInt32
     End Function

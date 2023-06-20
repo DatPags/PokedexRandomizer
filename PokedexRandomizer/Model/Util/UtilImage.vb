@@ -1,18 +1,18 @@
 ﻿Module UtilImage
-    Public Async Function Get_Image_Async(url As String, settings As Settings, cache As IImageCache) As Task(Of BitmapImage)
+    Public Async Function GetImageFromUrlAsync(url As String, settings As Settings, cache As IImageCache) As Task(Of BitmapImage)
         Dim cachedImage As BitmapImage = If(cache IsNot Nothing AndAlso settings.UseCache, cache.GetImageIfExists(url), Nothing)
         If cachedImage Is Nothing Then
             Dim client As New System.Net.WebClient
             Dim uri As New Uri(url)
             Dim stream = Await client.OpenReadTaskAsync(uri)
             Dim image = System.Drawing.Image.FromStream(stream)
-            cachedImage = Image_To_Image_Source(image)
+            cachedImage = ImageToImageSource(image)
             If cache IsNot Nothing AndAlso settings.UseCache Then cache.StoreImageInCache(cachedImage, url)
         End If
         Return cachedImage
     End Function
 
-    Public Function Image_To_Image_Source(bm As System.Drawing.Bitmap) As BitmapImage
+    Public Function ImageToImageSource(bm As System.Drawing.Bitmap) As BitmapImage
         Dim bmFinal As BitmapImage
         Using memory As New System.IO.MemoryStream
             bm.Save(memory, System.Drawing.Imaging.ImageFormat.Png)
@@ -26,7 +26,7 @@
         Return bmFinal
     End Function
 
-    Public Function Image_Source_To_Image(bm As BitmapSource) As System.Drawing.Bitmap
+    Public Function ImageSourceToImage(bm As BitmapSource) As System.Drawing.Bitmap
         Using memory As New System.IO.MemoryStream
             Dim enc = New BmpBitmapEncoder
             enc.Frames.Add(BitmapFrame.Create(bm))
@@ -36,23 +36,23 @@
         End Using
     End Function
 
-    Public Function Images_Equal(bmi1 As BitmapImage, bmi2 As BitmapImage) As Boolean
-        Dim bm1 As System.Drawing.Bitmap = Image_Source_To_Image(bmi1)
-        Dim bm2 As System.Drawing.Bitmap = Image_Source_To_Image(bmi2)
-        Return Images_Equal(bm1, bm2)
+    Public Function AreImagesEqual(bmi1 As BitmapImage, bmi2 As BitmapImage) As Boolean
+        Dim bm1 As System.Drawing.Bitmap = ImageSourceToImage(bmi1)
+        Dim bm2 As System.Drawing.Bitmap = ImageSourceToImage(bmi2)
+        Return AreImagesEqual(bm1, bm2)
     End Function
 
-    Public Function Images_Equal(bm1 As System.Drawing.Bitmap, bmi2 As BitmapImage) As Boolean
-        Dim bm2 As System.Drawing.Bitmap = Image_Source_To_Image(bmi2)
-        Return Images_Equal(bm1, bm2)
+    Public Function AreImagesEqual(bm1 As System.Drawing.Bitmap, bmi2 As BitmapImage) As Boolean
+        Dim bm2 As System.Drawing.Bitmap = ImageSourceToImage(bmi2)
+        Return AreImagesEqual(bm1, bm2)
     End Function
 
-    Public Function Images_Equal(bmi1 As BitmapImage, bm2 As System.Drawing.Bitmap) As Boolean
-        Dim bm1 As System.Drawing.Bitmap = Image_Source_To_Image(bmi1)
-        Return Images_Equal(bm1, bm2)
+    Public Function AreImagesEqual(bmi1 As BitmapImage, bm2 As System.Drawing.Bitmap) As Boolean
+        Dim bm1 As System.Drawing.Bitmap = ImageSourceToImage(bmi1)
+        Return AreImagesEqual(bm1, bm2)
     End Function
 
-    Public Function Images_Equal(bm1 As System.Drawing.Bitmap, bm2 As System.Drawing.Bitmap) As Boolean
+    Public Function AreImagesEqual(bm1 As System.Drawing.Bitmap, bm2 As System.Drawing.Bitmap) As Boolean
         Dim threshold As Integer = 10
 
         If bm1.Width <> bm2.Width OrElse bm1.Height <> bm2.Height Then

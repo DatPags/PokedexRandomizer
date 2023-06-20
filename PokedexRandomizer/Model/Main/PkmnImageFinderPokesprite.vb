@@ -11,12 +11,12 @@
 
     Public Shared Async Function Create_Self() As Task(Of PkmnImageFinderPokesprite)
         Dim obj = New PkmnImageFinderPokesprite
-        Dim text = Await Get_Text_Async(URL_IMG_JSON)
+        Dim text = Await GetTextFromUrlAsync(URL_IMG_JSON)
         obj._imageJson = Newtonsoft.Json.Linq.JObject.Parse(text)
         Return obj
     End Function
 
-    Public Async Function Get_All_Images_For_Pkmn(pkmnInfo As PkmnInfo, settings As Settings, cache As IImageCache) As Task(Of List(Of BitmapImage)) Implements IPkmnImageFinder.Get_All_Images_For_Pkmn
+    Public Async Function GetPkmnImageListAsync(pkmnInfo As PkmnInfo, settings As Settings, cache As IImageCache) As Task(Of List(Of BitmapImage)) Implements IPkmnImageFinder.GetPkmnImageListAsync
         Dim imgList As New List(Of BitmapImage), baseName As String = "", formsToken As Newtonsoft.Json.Linq.JToken = Nothing, forms As New List(Of Newtonsoft.Json.Linq.JToken)
         Dim imgUnknown As Boolean = False
         Try
@@ -34,7 +34,7 @@
             If imgUnknown Then
                 If imgList.Count = 0 Then
                     Try
-                        imgList.Add(Await Get_Pkmn_Image_Unknown(settings, cache))
+                        imgList.Add(Await GetUnknownImageAsync(settings, cache))
                     Catch ex As System.Net.WebException
                         imgList.Add(Nothing)
                     End Try
@@ -47,7 +47,7 @@
             ' Special cases for certain Pokemon
             If pkmnInfo.name = "Urshifu" Then
                 Try
-                    imgList.Add(Await Get_Pkmn_Image(baseName, settings, cache))
+                    imgList.Add(Await GetPkmnImageAsync(baseName, settings, cache))
                 Catch ex As System.Net.WebException
                     imgList.Add(Nothing)
                 End Try
@@ -57,14 +57,14 @@
                 Continue For
             ElseIf pkmnInfo.name = "Minior" AndAlso formIndex > 0 Then
                 Try
-                    imgList.Add(Await Get_Pkmn_Image(baseName & "-blue", settings, cache))
+                    imgList.Add(Await GetPkmnImageAsync(baseName & "-blue", settings, cache))
                 Catch ex As System.Net.WebException
                     imgList.Add(Nothing)
                 End Try
                 Continue For
             ElseIf pkmnInfo.name = "Darmanitan" AndAlso pkmnInfo.forms(formIndex) = "Galarian Zen Mode" Then
                 Try
-                    imgList.Add(Await Get_Pkmn_Image(baseName & "-galar-zen", settings, cache))
+                    imgList.Add(Await GetPkmnImageAsync(baseName & "-galar-zen", settings, cache))
                 Catch ex As System.Net.WebException
                     imgList.Add(Nothing)
                 End Try
@@ -74,7 +74,7 @@
             If formIndex = 0 AndAlso pkmnInfo.name = pkmnInfo.forms(formIndex) Then
                 ' Get base image if this is first form and form name = pokemon name
                 Try
-                    imgList.Add(Await Get_Pkmn_Image(baseName, settings, cache))
+                    imgList.Add(Await GetPkmnImageAsync(baseName, settings, cache))
                 Catch ex As System.Net.WebException
                     imgList.Add(Nothing)
                 End Try
@@ -82,7 +82,7 @@
                 ' For male/female form differences, check in a different location if they exist
                 If pkmnInfo.forms(formIndex) = "Male" Then
                     Try
-                        imgList.Add(Await Get_Pkmn_Image(baseName, settings, cache))
+                        imgList.Add(Await GetPkmnImageAsync(baseName, settings, cache))
                     Catch ex As System.Net.WebException
                         If imgList.Count = 0 Then
                             imgList.Add(Nothing)
@@ -111,7 +111,7 @@
                     End If
                     If getFemaleImg Then
                         Try
-                            imgList.Add(Await Get_Pkmn_Image(URL_IMG_FEMALE & baseName, settings, cache))
+                            imgList.Add(Await GetPkmnImageAsync(URL_IMG_FEMALE & baseName, settings, cache))
                         Catch ex As System.Net.WebException
                             If imgList.Count = 0 Then
                                 imgList.Add(Nothing)
@@ -121,7 +121,7 @@
                         End Try
                     Else
                         Try
-                            imgList.Add(Await Get_Pkmn_Image(baseName, settings, cache))
+                            imgList.Add(Await GetPkmnImageAsync(baseName, settings, cache))
                         Catch ex As System.Net.WebException
                             If imgList.Count = 0 Then
                                 imgList.Add(Nothing)
@@ -178,9 +178,9 @@
                 If match Then
                     Try
                         If useDefault Then
-                            imgList.Add(Await Get_Pkmn_Image(baseName, settings, cache))
+                            imgList.Add(Await GetPkmnImageAsync(baseName, settings, cache))
                         Else
-                            imgList.Add(Await Get_Pkmn_Image(baseName & "-" & imgNameCheck, settings, cache))
+                            imgList.Add(Await GetPkmnImageAsync(baseName & "-" & imgNameCheck, settings, cache))
                         End If
                     Catch ex As System.Net.WebException
                         If imgList.Count = 0 Then
@@ -193,21 +193,21 @@
                     If imgList.Count = 0 Then
                         Dim fail As Boolean = False
                         Try
-                            imgList.Add(Await Get_Pkmn_Image(baseName, settings, cache))
+                            imgList.Add(Await GetPkmnImageAsync(baseName, settings, cache))
                         Catch ex As System.Net.WebException
                             fail = True
                         End Try
 
                         If fail Then
                             Try
-                                imgList.Add(Await Get_Pkmn_Image_Unknown(settings, cache))
+                                imgList.Add(Await GetUnknownImageAsync(settings, cache))
                             Catch ex As System.Net.WebException
                                 imgList.Add(Nothing)
                             End Try
                         End If
                     Else
                         Try
-                            imgList.Add(Await Get_Pkmn_Image_Unknown(settings, cache))
+                            imgList.Add(Await GetUnknownImageAsync(settings, cache))
                         Catch ex As System.Net.WebException
                             imgList.Add(imgList(0))
                         End Try
@@ -218,11 +218,11 @@
         Return imgList
     End Function
 
-    Private Async Function Get_Pkmn_Image(imgName As String, settings As Settings, cache As IImageCache) As Task(Of BitmapImage)
-        Return Await Get_Image_Async(URL_IMG_PRE & imgName & URL_IMG_POST, settings, cache)
+    Private Async Function GetPkmnImageAsync(imgName As String, settings As Settings, cache As IImageCache) As Task(Of BitmapImage)
+        Return Await GetImageFromUrlAsync(URL_IMG_PRE & imgName & URL_IMG_POST, settings, cache)
     End Function
 
-    Private Async Function Get_Pkmn_Image_Unknown(settings As Settings, cache As IImageCache) As Task(Of BitmapImage)
-        Return Await Get_Image_Async(URL_IMG_UNKNOWN, settings, cache)
+    Private Async Function GetUnknownImageAsync(settings As Settings, cache As IImageCache) As Task(Of BitmapImage)
+        Return Await GetImageFromUrlAsync(URL_IMG_UNKNOWN, settings, cache)
     End Function
 End Class
