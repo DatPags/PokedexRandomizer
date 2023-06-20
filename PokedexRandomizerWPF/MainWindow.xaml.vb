@@ -80,8 +80,8 @@ Class MainWindow
         End If
         _numPkmnLabel.Content = "Initializing..."
         _cache = New AppDataLocalCache()
-        Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderLocal.CreateSelfAsync() ' PkmnInfoFinderPokemonDB.CreateSelfAsync(_settings, cache:=cache)
-        Dim imageEngine As IPkmnImageFinder = Await PkmnImageFinderLocal.CreateSelfAsync() ' PkmnImageFinderPokesprite.CreateSelfAsync(cache:=cache)
+        Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderLocal.CreateSelfAsync() ' Await PkmnInfoFinderPokemonDB.CreateSelfAsync(_settings, cache:=_cache)
+        Dim imageEngine As IPkmnImageFinder = Await PkmnImageFinderLocal.CreateSelfAsync() ' PkmnImageFinderPokesprite.CreateSelfAsync(cache:=_cache)
         Await Util.LoadExtraDataAsync()
         _pkmnInfoRetriever = New PkmnInfoRetriever(infoEngine, imageEngine)
         Await _pkmnInfoRetriever.LoadMoveCategoryImagesAsync()
@@ -93,7 +93,7 @@ Class MainWindow
         TabPokedex.Visibility = If(infoEngine.SupportsRapidLookup, Visibility.Visible, Visibility.Collapsed)
         TabPokedex.IsEnabled = True
         _usePokedexImages = imageEngine.SupportsRapidLookup
-        Await FillPokedex()
+        If infoEngine.SupportsRapidLookup Then Await FillPokedex()
     End Sub
 
 #Region "UI Events"
@@ -109,7 +109,7 @@ Class MainWindow
             End If
         Loop Until randomNumbers.Count >= MAX_COLS
 
-        Dim tasks As New List(Of Task(Of Pkmn))
+        Dim tasks As New List(Of Task(Of PkmnInfo))
         For index = 0 To NumberCombobox.SelectedIndex
             tasks.Add(_pkmnInfoRetriever.GetPkmnAsync(randomNumbers(index) + 1, _settings))
             _displays(index).SetLoading()
@@ -169,12 +169,12 @@ Class MainWindow
 
     Private Sub ReRandomizeMoves(sender As Object, e As RoutedEventArgs) Handles ReRandomizeMovesButton.Click
         Dim pkmnInfo = _displays(MOVES_IDX).PkmnInfo
-        If Not pkmnInfo.pkmn.number = 0 Then
-            For formIndex = 0 To pkmnInfo.pkmn.moveForms.Count - 1
+        If Not pkmnInfo.number = 0 Then
+            For formIndex = 0 To pkmnInfo.moveForms.Count - 1
                 Dim formMoves As FormMoveDisplay = MoveListBox.Items.GetItemAt(formIndex)
-                Dim abilityList = pkmnInfo.pkmn.abilities(pkmnInfo.pkmn.forms.IndexOf(pkmnInfo.pkmn.moveForms(formIndex)))
+                Dim abilityList = pkmnInfo.abilities(pkmnInfo.forms.IndexOf(pkmnInfo.moveForms(formIndex)))
                 formMoves.PkmnAbility = abilityList(_ran.Next(abilityList.Count))
-                formMoves.PkmnMoveList = _pkmnInfoRetriever.PickRandomMoves(pkmnInfo.pkmn.moves(formIndex))
+                formMoves.PkmnMoveList = _pkmnInfoRetriever.PickRandomMoves(pkmnInfo.moves(formIndex))
             Next
         End If
     End Sub
@@ -294,9 +294,9 @@ Class MainWindow
 #End Region
 
 #Region "Fill Listboxes"
-    Private Sub FillEntryList(pkmn As Pkmn)
-        For entryIndex = 0 To pkmn.pkmn.games.Count - 1
-            Dim entryDisplay = New EntryDisplay(pkmn.pkmn.games(entryIndex), pkmn.pkmn.entries(entryIndex))
+    Private Sub FillEntryList(pkmn As PkmnInfo)
+        For entryIndex = 0 To pkmn.games.Count - 1
+            Dim entryDisplay = New EntryDisplay(pkmn.games(entryIndex), pkmn.entries(entryIndex))
             If entryIndex Mod 2 = 0 Then
                 entryDisplay.BackgroundColor = "#FFFFFFFF"
             Else
@@ -306,25 +306,25 @@ Class MainWindow
         Next
     End Sub
 
-    Private Sub FillFormList(pkmn As Pkmn)
-        For formIndex = 0 To pkmn.pkmn.forms.Count - 1
-            FormListBox.Items.Add(New FormDisplay(pkmn.GetImage(formIndex), pkmn.pkmn.forms(formIndex)))
+    Private Sub FillFormList(pkmn As PkmnInfo)
+        For formIndex = 0 To pkmn.forms.Count - 1
+            FormListBox.Items.Add(New FormDisplay(pkmn.GetImage(formIndex), pkmn.forms(formIndex)))
         Next
     End Sub
 
-    Private Sub FillMoveList(pkmn As Pkmn)
-        For formIndex = 0 To pkmn.pkmn.moveForms.Count - 1
+    Private Sub FillMoveList(pkmn As PkmnInfo)
+        For formIndex = 0 To pkmn.moveForms.Count - 1
             Dim im As BitmapImage
             Dim abilityList As List(Of String)
-            If pkmn.pkmn.forms.Contains(pkmn.pkmn.moveForms(formIndex)) Then
-                im = pkmn.GetIcon(pkmn.pkmn.forms.IndexOf(pkmn.pkmn.moveForms(formIndex)))
-                abilityList = pkmn.pkmn.abilities(pkmn.pkmn.forms.IndexOf(pkmn.pkmn.moveForms(formIndex)))
+            If pkmn.forms.Contains(pkmn.moveForms(formIndex)) Then
+                im = pkmn.GetIcon(pkmn.forms.IndexOf(pkmn.moveForms(formIndex)))
+                abilityList = pkmn.abilities(pkmn.forms.IndexOf(pkmn.moveForms(formIndex)))
             Else
                 im = pkmn.GetIcon(0)
-                abilityList = pkmn.pkmn.abilities(0)
+                abilityList = pkmn.abilities(0)
             End If
-            Dim formName = pkmn.pkmn.moveForms(formIndex)
-            Dim randomMoves = _pkmnInfoRetriever.PickRandomMoves(pkmn.pkmn.moves(formIndex))
+            Dim formName = pkmn.moveForms(formIndex)
+            Dim randomMoves = _pkmnInfoRetriever.PickRandomMoves(pkmn.moves(formIndex))
             Dim ability = abilityList(_ran.Next(abilityList.Count))
             Dim formMoves = New FormMoveDisplay(im, formName, ability, randomMoves, _pkmnInfoRetriever)
 

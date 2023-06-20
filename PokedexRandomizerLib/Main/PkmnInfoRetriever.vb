@@ -10,16 +10,15 @@
         _moveCategories = New Dictionary(Of String, Tuple(Of String, SixLabors.ImageSharp.Image))
     End Sub
 
-    Public Async Function GetPkmnAsync(pkmnNumber As Integer, settings As Settings) As Task(Of Pkmn)
+    Public Async Function GetPkmnAsync(pkmnNumber As Integer, settings As Settings) As Task(Of PkmnInfo)
         Dim pkmnInfo As PkmnInfo = Await InfoEngine.GetPkmnInfoAsync(pkmnNumber)
-        Dim pkmn As New Pkmn With {.pkmn = pkmnInfo}
-        pkmn.icons = Await ImageEngine.GetPkmnIconListAsync(pkmn.pkmn)
-        pkmn.iconUris = New List(Of String)
-        If TypeOf ImageEngine Is IPkmnImageFinderURI Then pkmn.iconUris = DirectCast(ImageEngine, IPkmnImageFinderURI).GetPkmnIconURIList(pkmn.pkmn)
-        pkmn.images = Await ImageEngine.GetPkmnImageListAsync(pkmn.pkmn)
-        pkmn.imageUris = New List(Of String)
-        If TypeOf ImageEngine Is IPkmnImageFinderURI Then pkmn.imageUris = DirectCast(ImageEngine, IPkmnImageFinderURI).GetPkmnImageURIList(pkmn.pkmn)
-        Return pkmn
+        pkmnInfo.icons = Await ImageEngine.GetPkmnIconListAsync(pkmnInfo)
+        pkmnInfo.iconUris = New List(Of String)
+        If TypeOf ImageEngine Is IPkmnImageFinderURI Then pkmnInfo.iconUris = DirectCast(ImageEngine, IPkmnImageFinderURI).GetPkmnIconURIList(pkmnInfo)
+        pkmnInfo.images = Await ImageEngine.GetPkmnImageListAsync(pkmnInfo)
+        pkmnInfo.imageUris = New List(Of String)
+        If TypeOf ImageEngine Is IPkmnImageFinderURI Then pkmnInfo.imageUris = DirectCast(ImageEngine, IPkmnImageFinderURI).GetPkmnImageURIList(pkmnInfo)
+        Return pkmnInfo
     End Function
 
     Public Function GetTotalNumOfPkmn() As Integer
@@ -47,25 +46,25 @@
         End If
     End Function
 
-    Public Function SelectRandomEntry(pkmn As Pkmn, settings As Settings) As List(Of Integer)
-        Dim entryToUse = _ran.Next(maxValue:=pkmn.pkmn.games.Count)
+    Public Function SelectRandomEntry(pkmn As PkmnInfo, settings As Settings) As List(Of Integer)
+        Dim entryToUse = _ran.Next(maxValue:=pkmn.games.Count)
         Dim formIndex As Integer
-        If pkmn.pkmn.forms.Count > 1 Then
+        If pkmn.forms.Count > 1 Then
             If settings.PrioritizeForms Then
                 ' Prioritize forms, select an entry that matches the chosen form
-                formIndex = _ran.Next(maxValue:=pkmn.pkmn.forms.Count)
+                formIndex = _ran.Next(maxValue:=pkmn.forms.Count)
                 Dim entriesChoose = New List(Of Integer)
-                For entryIdx = 0 To pkmn.pkmn.games.Count - 1
-                    If pkmn.pkmn.forms(formIndex) = pkmn.pkmn.name Then
-                        If Not pkmn.pkmn.games(entryIdx).Contains("(") And Not pkmn.pkmn.games(entryIdx).EndsWith(")") Then
+                For entryIdx = 0 To pkmn.games.Count - 1
+                    If pkmn.forms(formIndex) = pkmn.name Then
+                        If Not pkmn.games(entryIdx).Contains("(") And Not pkmn.games(entryIdx).EndsWith(")") Then
                             entriesChoose.Add(entryIdx)
                         End If
                     Else
-                        If pkmn.pkmn.games(entryIdx).Contains("(") And pkmn.pkmn.games(entryIdx).EndsWith(")") Then
-                            Dim gameName = pkmn.pkmn.games(entryIdx)
+                        If pkmn.games(entryIdx).Contains("(") And pkmn.games(entryIdx).EndsWith(")") Then
+                            Dim gameName = pkmn.games(entryIdx)
                             Dim i = gameName.IndexOf("(")
                             Dim gameNameSubstr = gameName.Substring(i + 1, gameName.IndexOf(")", i + 1) - i - 1)
-                            If gameNameSubstr = pkmn.pkmn.forms(formIndex) Then
+                            If gameNameSubstr = pkmn.forms(formIndex) Then
                                 entriesChoose.Add(entryIdx)
                             End If
                         End If
@@ -77,14 +76,14 @@
                 End If
             Else
                 ' Prioritize entries, attempt to match chosen entry to a form
-                If pkmn.pkmn.games(entryToUse).Contains("(") And pkmn.pkmn.games(entryToUse).EndsWith(")") Then
+                If pkmn.games(entryToUse).Contains("(") And pkmn.games(entryToUse).EndsWith(")") Then
                     ' If game name has (), choose the form that matches the text in the ()
-                    Dim gameName = pkmn.pkmn.games(entryToUse)
+                    Dim gameName = pkmn.games(entryToUse)
                     Dim i = gameName.IndexOf("(")
                     Dim gameNameSubstr = gameName.Substring(i + 1, gameName.IndexOf(")", i + 1) - i - 1)
                     Dim foundForm = False
-                    For fi = 0 To pkmn.pkmn.forms.Count - 1
-                        Dim formName = pkmn.pkmn.forms(fi)
+                    For fi = 0 To pkmn.forms.Count - 1
+                        Dim formName = pkmn.forms(fi)
                         If formName = gameNameSubstr Then
                             formIndex = fi
                             foundForm = True
@@ -93,15 +92,15 @@
                     Next
                     If Not foundForm Then
                         ' If no form matches what's in the (), choose a form at random
-                        formIndex = _ran.Next(maxValue:=pkmn.pkmn.forms.Count)
+                        formIndex = _ran.Next(maxValue:=pkmn.forms.Count)
                     End If
                 Else
                     ' If the game doesn't have (), choose a form that isn't in the () of another game
                     Dim possibleForms = New List(Of Integer)
-                    For fi = 0 To pkmn.pkmn.forms.Count - 1
-                        Dim formName = pkmn.pkmn.forms(fi)
+                    For fi = 0 To pkmn.forms.Count - 1
+                        Dim formName = pkmn.forms(fi)
                         Dim formNamePossible = True
-                        For Each gameName In pkmn.pkmn.games
+                        For Each gameName In pkmn.games
                             If gameName.Contains("(") And gameName.EndsWith(")") Then
                                 Dim i = gameName.IndexOf("(")
                                 Dim gameNameSubstr = gameName.Substring(i + 1, gameName.IndexOf(")", i + 1) - i - 1)
@@ -119,7 +118,7 @@
                         formIndex = possibleForms(_ran.Next(maxValue:=possibleForms.Count))
                     Else
                         ' If every form name is in another game name's (), choose a form at random
-                        formIndex = _ran.Next(maxValue:=pkmn.pkmn.forms.Count)
+                        formIndex = _ran.Next(maxValue:=pkmn.forms.Count)
                     End If
                 End If
             End If
@@ -127,7 +126,7 @@
             ' Only 1 form, so choose any entry
             formIndex = 0
         End If
-        Return New List(Of Integer) From {{formIndex}, {entryToUse}, {_ran.Next(maxValue:=pkmn.pkmn.abilities(formIndex).Count)}}
+        Return New List(Of Integer) From {{formIndex}, {entryToUse}, {_ran.Next(maxValue:=pkmn.abilities(formIndex).Count)}}
     End Function
 
     Public Function PickRandomMoves(moveList As List(Of MoveInfo)) As List(Of MoveInfo)
