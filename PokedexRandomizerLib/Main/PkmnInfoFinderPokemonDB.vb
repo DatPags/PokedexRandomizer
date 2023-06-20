@@ -99,7 +99,7 @@ Public Class PkmnInfoFinderPokemonDB
         Return obj
     End Function
 
-    Public Shared Async Sub CreateJSONFile()
+    Friend Shared Async Function CreateJSONFile() As Task
         Debug.Write("Starting JSON file creation")
         Dim sw As New Stopwatch()
         sw.Start()
@@ -111,10 +111,10 @@ Public Class PkmnInfoFinderPokemonDB
         Next
         Debug.WriteLine("Downloads completed")
         Dim json = JsonConvert.SerializeObject(dict)
-        Await IO.File.WriteAllTextAsync(IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "mpagliaro98", "Pokedex Randomizer", "pkmn.json"), json)
+        Await IO.File.WriteAllTextAsync(IO.Path.Combine(Util.DIRECTORY_BASE, "working", "pkmn.json"), json)
         sw.Stop()
         Debug.WriteLine("Completed JSON file creation: " + sw.ElapsedMilliseconds.ToString + "ms, " + Encoding.UTF8.GetByteCount(json).ToString + " bytes")
-    End Sub
+    End Function
 
     Public Function GetTotalNumOfPkmn() As Integer Implements IPkmnInfoFinder.GetTotalNumOfPkmn
         Return _urlList.Count

@@ -23,6 +23,7 @@
         End If
 
         Dim pkmn As New Pkmn With {.pkmn = pkmnInfo.Value}
+        pkmn.icons = Await ImageEngine.GetPkmnIconListAsync(pkmn.pkmn, settings, ImageCache)
         pkmn.images = Await ImageEngine.GetPkmnImageListAsync(pkmn.pkmn, settings, ImageCache)
         Return pkmn
     End Function

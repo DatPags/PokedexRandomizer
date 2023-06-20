@@ -63,11 +63,13 @@ Class MainWindow
 
         ' initialize the model
         _numPkmnLabel.Content = "Initializing..."
-        'PkmnInfoFinderPokemonDB.CreateJSONFile()
+        'Await Util.CreateDataArchive() '--uncomment to update the data archive
+        Await Util.DownloadDataIfNotExists()
         Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderLocal.CreateSelf() ' PkmnInfoFinderPokemonDB.CreateSelf()
-        Dim imageEngine As IPkmnImageFinder = Await PkmnImageFinderPokesprite.Create_Self()
+        Dim imageEngine As IPkmnImageFinder = Await PkmnImageFinderLocal.CreateSelf() ' Await PkmnImageFinderPokesprite.Create_Self()
+        Await Util.LoadExtraData()
         Dim cache As New AppDataLocalCache()
-        _pkmnInfoRetriever = New PkmnInfoRetriever(infoEngine, imageEngine, imageCache:=cache)
+        _pkmnInfoRetriever = New PkmnInfoRetriever(infoEngine, imageEngine)
         _numPkmnLabel.Content = "Total number of Pokémon: " & _pkmnInfoRetriever.GetTotalNumOfPkmn().ToString
         MoveDisplay.LoadMoveCategoryImagesAsync(_settings, cache)
 
@@ -265,10 +267,10 @@ Class MainWindow
             Dim im As SixLabors.ImageSharp.Image
             Dim abilityList As List(Of String)
             If pkmn.pkmn.forms.Contains(pkmn.pkmn.moveForms(formIndex)) Then
-                im = pkmn.images(pkmn.pkmn.forms.IndexOf(pkmn.pkmn.moveForms(formIndex)))
+                im = pkmn.icons(pkmn.pkmn.forms.IndexOf(pkmn.pkmn.moveForms(formIndex)))
                 abilityList = pkmn.pkmn.abilities(pkmn.pkmn.forms.IndexOf(pkmn.pkmn.moveForms(formIndex)))
             Else
-                im = pkmn.images(0)
+                im = pkmn.icons(0)
                 abilityList = pkmn.pkmn.abilities(0)
             End If
             Dim formName = pkmn.pkmn.moveForms(formIndex)

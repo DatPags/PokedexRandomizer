@@ -34,7 +34,7 @@
             .VerticalAlignment = VerticalAlignment.Center,
             .Margin = New Thickness(5, 5, 5, 5)
         }
-        RenderOptions.SetBitmapScalingMode(_im, BitmapScalingMode.NearestNeighbor)
+        RenderOptions.SetBitmapScalingMode(_im, BitmapScalingMode.HighQuality)
         Me.PkmnImage = image.ToBitmapImage
 
         _formText = New TextBlock With {

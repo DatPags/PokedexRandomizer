@@ -14,6 +14,7 @@
     End Function
 
     Public Shared Async Function GetHtmlAsync(url As String) As Task(Of HtmlAgilityPack.HtmlDocument)
+        Debug.WriteLine("Getting HTML from URL: " + url)
         Dim html = New HtmlAgilityPack.HtmlDocument
         Dim bytes = Await Util.HttpClient.GetByteArrayAsync(url)
         Dim utf8 = New System.Text.UTF8Encoding
@@ -22,6 +23,7 @@
     End Function
 
     Public Shared Async Function GetTextFromUrlAsync(url As String) As Task(Of String)
+        Debug.WriteLine("Getting text from URL: " + url)
         Return Await Util.HttpClient.GetStringAsync(url)
     End Function
 End Class
