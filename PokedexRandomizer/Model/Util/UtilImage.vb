@@ -8,7 +8,7 @@
             Dim stream = Await client.OpenReadTaskAsync(uri)
             Dim image = System.Drawing.Image.FromStream(stream)
             cachedImage = Image_To_Image_Source(image)
-            cache.StoreInCache(cachedImage, url)
+            cache.StoreImageInCache(cachedImage, url)
         End If
         Return cachedImage
     End Function
