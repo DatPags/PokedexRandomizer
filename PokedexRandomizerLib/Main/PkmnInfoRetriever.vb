@@ -15,12 +15,11 @@
 
     Public Async Function GetPkmnAsync(pkmnNumber As Integer, settings As Settings) As Task(Of Pkmn)
         Dim pkmnInfo As PkmnInfo?
-        Dim cache As IPkmnInfoCache = New AppDataLocalCache()
-        If InfoCache IsNot Nothing AndAlso settings.UseCache Then pkmnInfo = cache.GetPkmnInfoIfExists(pkmnNumber.ToString) Else pkmnInfo = Nothing
+        If InfoCache IsNot Nothing AndAlso settings.UseCache Then pkmnInfo = InfoCache.GetPkmnInfoIfExists(pkmnNumber.ToString) Else pkmnInfo = Nothing
 
         If pkmnInfo Is Nothing Then
             pkmnInfo = Await InfoEngine.GetPkmnInfoAsync(pkmnNumber)
-            If InfoCache IsNot Nothing AndAlso settings.UseCache Then cache.StorePkmnInfoInCache(pkmnInfo.Value, pkmnNumber.ToString)
+            If InfoCache IsNot Nothing AndAlso settings.UseCache Then InfoCache.StorePkmnInfoInCache(pkmnInfo.Value, pkmnNumber.ToString)
         End If
 
         Dim pkmn As New Pkmn With {.pkmn = pkmnInfo.Value}

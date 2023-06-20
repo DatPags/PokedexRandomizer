@@ -1,4 +1,7 @@
-﻿Public Class PkmnInfoFinderPokemonDB
+﻿Imports System.Text
+Imports Newtonsoft.Json
+
+Public Class PkmnInfoFinderPokemonDB
     Implements IPkmnInfoFinder
 
     Private Const URL_BASE = "https://pokemondb.net"
@@ -95,6 +98,23 @@
         obj.BuildNameMap()
         Return obj
     End Function
+
+    Public Shared Async Sub CreateJSONFile()
+        Debug.Write("Starting JSON file creation")
+        Dim sw As New Stopwatch()
+        sw.Start()
+        Dim obj = Await CreateSelf()
+        Dim dict As New Dictionary(Of Integer, PkmnInfo)
+        For idx As Integer = 1 To obj.GetTotalNumOfPkmn()
+            dict.Add(idx, Await obj.GetPkmnInfoAsync(idx))
+            Debug.Write(".")
+        Next
+        Debug.WriteLine("Downloads completed")
+        Dim json = JsonConvert.SerializeObject(dict)
+        Await IO.File.WriteAllTextAsync(IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "mpagliaro98", "Pokedex Randomizer", "pkmn.json"), json)
+        sw.Stop()
+        Debug.WriteLine("Completed JSON file creation: " + sw.ElapsedMilliseconds.ToString + "ms, " + Encoding.UTF8.GetByteCount(json).ToString + " bytes")
+    End Sub
 
     Public Function GetTotalNumOfPkmn() As Integer Implements IPkmnInfoFinder.GetTotalNumOfPkmn
         Return _urlList.Count

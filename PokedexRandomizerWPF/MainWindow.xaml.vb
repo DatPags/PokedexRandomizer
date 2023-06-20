@@ -63,10 +63,11 @@ Class MainWindow
 
         ' initialize the model
         _numPkmnLabel.Content = "Initializing..."
-        Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderPokemonDB.CreateSelf()
+        'PkmnInfoFinderPokemonDB.CreateJSONFile()
+        Dim infoEngine As IPkmnInfoFinder = Await PkmnInfoFinderLocal.CreateSelf() ' PkmnInfoFinderPokemonDB.CreateSelf()
         Dim imageEngine As IPkmnImageFinder = Await PkmnImageFinderPokesprite.Create_Self()
         Dim cache As New AppDataLocalCache()
-        _pkmnInfoRetriever = New PkmnInfoRetriever(infoEngine, imageEngine, infoCache:=cache, imageCache:=cache)
+        _pkmnInfoRetriever = New PkmnInfoRetriever(infoEngine, imageEngine, imageCache:=cache)
         _numPkmnLabel.Content = "Total number of Pokémon: " & _pkmnInfoRetriever.GetTotalNumOfPkmn().ToString
         MoveDisplay.LoadMoveCategoryImagesAsync(_settings, cache)
 
