@@ -1,6 +1,6 @@
 ﻿Imports System.IO
-Imports System.Runtime.Serialization
-Imports System.Runtime.Serialization.Formatters.Binary
+Imports Newtonsoft.Json
+Imports SixLabors.ImageSharp
 
 Public Class AppDataLocalCache
     Implements IImageCache, IPkmnInfoCache
@@ -9,12 +9,12 @@ Public Class AppDataLocalCache
     Private Shared CACHE_DIRECTORY_IMAGES As String = IO.Path.Combine(CACHE_DIRECTORY_BASE, "cached_images")
     Private Shared CACHE_DIRECTORY_PKMN As String = IO.Path.Combine(CACHE_DIRECTORY_BASE, "cached_data")
     Private Const IMAGE_EXT As String = ".png"
-    Private Const PKMN_EXT As String = ".dat"
+    Private Const PKMN_EXT As String = ".json"
     Private Const CACHE_LENGTH_IMAGES_SECONDS As ULong = 60 * 60 * 24 * 30 '30 days
     Private Const CACHE_LENGTH_PKMN_SECONDS As ULong = 60 * 60 * 24 * 3 '3 days
 
-    Public Function GetImageIfExists(key As String) As BitmapImage Implements IImageCache.GetImageIfExists
-        If Not CreateDirectory(CACHE_DIRECTORY_IMAGES) Then Return Nothing
+    Public Function GetImageIfExists(key As String) As Image Implements IImageCache.GetImageIfExists
+        If Not Util.CreateDirectory(CACHE_DIRECTORY_IMAGES) Then Return Nothing
         Dim path As String = IO.Path.Combine(CACHE_DIRECTORY_IMAGES, GenerateFilename(key, IMAGE_EXT))
         Try
             'check for cache expiration
@@ -24,15 +24,7 @@ Public Class AppDataLocalCache
                 Return Nothing
             End If
 
-            Dim bmFinal As BitmapImage
-            Using fs As IO.FileStream = IO.File.Open(path, IO.FileMode.Open)
-                fs.Position = 0
-                bmFinal = New BitmapImage
-                bmFinal.BeginInit()
-                bmFinal.StreamSource = fs
-                bmFinal.CacheOption = BitmapCacheOption.OnLoad
-                bmFinal.EndInit()
-            End Using
+            Dim bmFinal As Image = Image.Load(path)
             Debug.WriteLine("Successfully loaded from image cache: " & path)
             Return bmFinal
         Catch ex As Exception When TypeOf ex Is IO.IOException Or TypeOf ex Is UnauthorizedAccessException _
@@ -42,8 +34,8 @@ Public Class AppDataLocalCache
         End Try
     End Function
 
-    Public Sub StoreImageInCache(image As BitmapImage, key As String) Implements IImageCache.StoreImageInCache
-        If Not CreateDirectory(CACHE_DIRECTORY_IMAGES) Then Exit Sub
+    Public Sub StoreImageInCache(image As Image, key As String) Implements IImageCache.StoreImageInCache
+        If Not Util.CreateDirectory(CACHE_DIRECTORY_IMAGES) Then Exit Sub
         Dim path As String = IO.Path.Combine(CACHE_DIRECTORY_IMAGES, GenerateFilename(key, IMAGE_EXT))
         Try
             image.Save(path)
@@ -55,7 +47,7 @@ Public Class AppDataLocalCache
     End Sub
 
     Public Function GetPkmnInfoIfExists(key As String) As PkmnInfo? Implements IPkmnInfoCache.GetPkmnInfoIfExists
-        If Not CreateDirectory(CACHE_DIRECTORY_PKMN) Then Return Nothing
+        If Not Util.CreateDirectory(CACHE_DIRECTORY_PKMN) Then Return Nothing
         Dim path As String = IO.Path.Combine(CACHE_DIRECTORY_PKMN, GenerateFilename(key, PKMN_EXT))
         Try
             'check for cache expiration
@@ -65,14 +57,11 @@ Public Class AppDataLocalCache
                 Return Nothing
             End If
 
-            Dim pkmnInfo As New PkmnInfo
-            Dim bf As New BinaryFormatter
-            Using fs As New FileStream(path, FileMode.Open)
-                pkmnInfo = bf.Deserialize(fs)
-            End Using
+            Dim contents = File.ReadAllText(path)
+            Dim pkmnInfo As PkmnInfo = JsonConvert.DeserializeObject(Of PkmnInfo)(contents)
             Debug.WriteLine("Successfully loaded from data cache: " & path)
             Return pkmnInfo
-        Catch ex As Exception When TypeOf ex Is IO.IOException Or TypeOf ex Is UnauthorizedAccessException Or TypeOf ex Is SerializationException _
+        Catch ex As Exception When TypeOf ex Is IO.IOException Or TypeOf ex Is UnauthorizedAccessException Or TypeOf ex Is JsonException _
             Or TypeOf ex Is IO.PathTooLongException Or TypeOf ex Is IO.DirectoryNotFoundException Or TypeOf ex Is IO.FileNotFoundException
             Debug.WriteLine("File not found in data cache: " & path & " - " & ex.Message)
             Return Nothing
@@ -80,14 +69,12 @@ Public Class AppDataLocalCache
     End Function
 
     Public Sub StorePkmnInfoInCache(info As PkmnInfo, key As String) Implements IPkmnInfoCache.StorePkmnInfoInCache
-        If Not CreateDirectory(CACHE_DIRECTORY_PKMN) Then Exit Sub
+        If Not Util.CreateDirectory(CACHE_DIRECTORY_PKMN) Then Exit Sub
         Dim path As String = IO.Path.Combine(CACHE_DIRECTORY_PKMN, GenerateFilename(key, PKMN_EXT))
         Try
-            Dim bf As New BinaryFormatter
-            Using fs As New FileStream(path, FileMode.Create)
-                bf.Serialize(fs, info)
-            End Using
-        Catch ex As Exception When TypeOf ex Is IO.IOException Or TypeOf ex Is UnauthorizedAccessException Or TypeOf ex Is SerializationException _
+            Dim json = JsonConvert.SerializeObject(info)
+            File.WriteAllText(path, json)
+        Catch ex As Exception When TypeOf ex Is IO.IOException Or TypeOf ex Is UnauthorizedAccessException _
             Or TypeOf ex Is IO.PathTooLongException Or TypeOf ex Is IO.DirectoryNotFoundException Or TypeOf ex Is IO.FileNotFoundException
             Debug.WriteLine("Data file save failed: " & path & " - " & ex.Message)
             File.Delete(path)
@@ -95,19 +82,8 @@ Public Class AppDataLocalCache
     End Sub
 
     Private Function GenerateFilename(key As String, ext As String) As String
-        Dim hash As UInteger = IntegerToUInteger(key.GetHashCode())
+        Dim hash As UInteger = Util.IntegerToUInteger(key.GetHashCodeDeterministic())
         Return hash.ToString & ext
-    End Function
-
-    Private Function CreateDirectory(path As String) As Boolean
-        Try
-            IO.Directory.CreateDirectory(path)
-            Return True
-        Catch ex As Exception When TypeOf ex Is IO.IOException Or TypeOf ex Is UnauthorizedAccessException _
-            Or TypeOf ex Is IO.PathTooLongException Or TypeOf ex Is IO.DirectoryNotFoundException
-            Debug.WriteLine("Error creating directory " & path & ": " & ex.Message)
-            Return False
-        End Try
     End Function
 
     Public Function IImageCache_ClearCache() As Boolean Implements IImageCache.ClearCache

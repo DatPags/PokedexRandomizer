@@ -1,6 +1,8 @@
-﻿Public Structure Pkmn
+﻿Imports SixLabors.ImageSharp
+
+Public Structure Pkmn
     Public pkmn As PkmnInfo
-    Public images As List(Of BitmapImage)
+    Public images As List(Of Image)
 End Structure
 
 <Serializable()>

@@ -1,4 +1,6 @@
-﻿Public Class PkmnImageFinderPokesprite
+﻿Imports SixLabors.ImageSharp
+
+Public Class PkmnImageFinderPokesprite
     Implements IPkmnImageFinder
 
     Private Const URL_IMG_PRE = "https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/regular/"
@@ -11,16 +13,16 @@
 
     Public Shared Async Function Create_Self() As Task(Of PkmnImageFinderPokesprite)
         Dim obj = New PkmnImageFinderPokesprite
-        Dim text = Await GetTextFromUrlAsync(URL_IMG_JSON)
+        Dim text = Await UtilWeb.GetTextFromUrlAsync(URL_IMG_JSON)
         obj._imageJson = Newtonsoft.Json.Linq.JObject.Parse(text)
         Return obj
     End Function
 
-    Public Async Function GetPkmnImageListAsync(pkmnInfo As PkmnInfo, settings As Settings, cache As IImageCache) As Task(Of List(Of BitmapImage)) Implements IPkmnImageFinder.GetPkmnImageListAsync
-        Dim imgList As New List(Of BitmapImage), baseName As String = "", formsToken As Newtonsoft.Json.Linq.JToken = Nothing, forms As New List(Of Newtonsoft.Json.Linq.JToken)
+    Public Async Function GetPkmnImageListAsync(pkmnInfo As PkmnInfo, settings As Settings, cache As IImageCache) As Task(Of List(Of Image)) Implements IPkmnImageFinder.GetPkmnImageListAsync
+        Dim imgList As New List(Of Image), baseName As String = "", formsToken As Newtonsoft.Json.Linq.JToken = Nothing, forms As New List(Of Newtonsoft.Json.Linq.JToken)
         Dim imgUnknown As Boolean = False
         Try
-            imgList = New List(Of BitmapImage)
+            imgList = New List(Of Image)
             baseName = _imageJson.SelectToken(pkmnInfo.number.ToString("D3")).SelectToken("slug").SelectToken("eng").ToString
             formsToken = _imageJson.SelectToken(pkmnInfo.number.ToString("D3")).SelectToken("gen-8").SelectToken("forms")
             forms = formsToken.Children.ToList
@@ -218,11 +220,11 @@
         Return imgList
     End Function
 
-    Private Async Function GetPkmnImageAsync(imgName As String, settings As Settings, cache As IImageCache) As Task(Of BitmapImage)
-        Return Await GetImageFromUrlAsync(URL_IMG_PRE & imgName & URL_IMG_POST, settings, cache)
+    Private Async Function GetPkmnImageAsync(imgName As String, settings As Settings, cache As IImageCache) As Task(Of Image)
+        Return Await UtilImage.GetImageFromUrlAsync(URL_IMG_PRE & imgName & URL_IMG_POST, settings, cache)
     End Function
 
-    Private Async Function GetUnknownImageAsync(settings As Settings, cache As IImageCache) As Task(Of BitmapImage)
-        Return Await GetImageFromUrlAsync(URL_IMG_UNKNOWN, settings, cache)
+    Private Async Function GetUnknownImageAsync(settings As Settings, cache As IImageCache) As Task(Of Image)
+        Return Await UtilImage.GetImageFromUrlAsync(URL_IMG_UNKNOWN, settings, cache)
     End Function
 End Class
