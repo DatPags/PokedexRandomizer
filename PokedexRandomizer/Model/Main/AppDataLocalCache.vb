@@ -6,8 +6,8 @@ Public Class AppDataLocalCache
     Implements IImageCache, IPkmnInfoCache
 
     Private Shared CACHE_DIRECTORY_BASE As String = IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "mpagliaro98", "Pokedex Randomizer")
-    Private Shared CACHE_DIRECTORY_IMAGES As String = IO.Path.Combine(CACHE_DIRECTORY_BASE, "images")
-    Private Shared CACHE_DIRECTORY_PKMN As String = IO.Path.Combine(CACHE_DIRECTORY_BASE, "data")
+    Private Shared CACHE_DIRECTORY_IMAGES As String = IO.Path.Combine(CACHE_DIRECTORY_BASE, "cached_images")
+    Private Shared CACHE_DIRECTORY_PKMN As String = IO.Path.Combine(CACHE_DIRECTORY_BASE, "cached_data")
     Private Const IMAGE_EXT As String = ".png"
     Private Const PKMN_EXT As String = ".dat"
     Private Const CACHE_LENGTH_IMAGES_SECONDS As ULong = 60 * 60 * 24 * 30 '30 days
@@ -105,7 +105,26 @@ Public Class AppDataLocalCache
             Return True
         Catch ex As Exception When TypeOf ex Is IO.IOException Or TypeOf ex Is UnauthorizedAccessException _
             Or TypeOf ex Is IO.PathTooLongException Or TypeOf ex Is IO.DirectoryNotFoundException
-            Debug.WriteLine("Error creating directory: " & ex.Message)
+            Debug.WriteLine("Error creating directory " & path & ": " & ex.Message)
+            Return False
+        End Try
+    End Function
+
+    Public Function IImageCache_ClearCache() As Boolean Implements IImageCache.ClearCache
+        Return DeleteDirectory(CACHE_DIRECTORY_IMAGES)
+    End Function
+
+    Public Function IPkmnInfoCache_ClearCache() As Boolean Implements IPkmnInfoCache.ClearCache
+        Return DeleteDirectory(CACHE_DIRECTORY_PKMN)
+    End Function
+
+    Private Function DeleteDirectory(path As String) As Boolean
+        Try
+            IO.Directory.Delete(path, True)
+            Return True
+        Catch ex As Exception When TypeOf ex Is IO.IOException Or TypeOf ex Is UnauthorizedAccessException _
+            Or TypeOf ex Is IO.PathTooLongException Or TypeOf ex Is IO.DirectoryNotFoundException
+            Debug.WriteLine("Error deleting directory " & path & ": " & ex.Message)
             Return False
         End Try
     End Function

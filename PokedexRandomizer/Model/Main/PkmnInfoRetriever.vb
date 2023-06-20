@@ -53,6 +53,16 @@
         End If
     End Function
 
+    Public Function ClearCache() As Boolean
+        If InfoCache IsNot Nothing Then
+            If Not InfoCache.ClearCache() Then Return False
+        End If
+        If ImageCache IsNot Nothing Then
+            If Not ImageCache.ClearCache() Then Return False
+        End If
+        Return True
+    End Function
+
     Public Function Random_Entry(pkmnInfo As Pkmn, settings As Settings) As List(Of Integer)
         Dim entryToUse = _ran.Next(maxValue:=pkmnInfo.pkmn.games.Count)
         Dim formIndex As Integer
