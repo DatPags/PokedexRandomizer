@@ -117,6 +117,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Model\Images\ImageCacheLayer.vb" />
+    <Compile Include="Model\Interfaces\IImageCache.vb" />
+    <Compile Include="Model\Util\Extensions.vb" />
     <Compile Include="UI\EntryDisplay.vb" />
     <Compile Include="UI\FormDisplay.vb" />
     <Compile Include="UI\FormMoveDisplay.vb" />

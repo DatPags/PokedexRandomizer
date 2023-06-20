@@ -14,7 +14,7 @@
         _imageJson = Newtonsoft.Json.Linq.JObject.Parse(text)
     End Sub
 
-    Public Async Function Get_All_Pkmn_Images(pkmnInfo As PkmnInfo) As Task(Of List(Of BitmapImage)) Implements IPkmnImageFinder.Get_All_Pkmn_Images
+    Public Async Function Get_All_Images_For_Pkmn(pkmnInfo As PkmnInfo) As Task(Of List(Of BitmapImage)) Implements IPkmnImageFinder.Get_All_Images_For_Pkmn
         Dim imgList As New List(Of BitmapImage), baseName As String = "", formsToken As Newtonsoft.Json.Linq.JToken = Nothing, forms As New List(Of Newtonsoft.Json.Linq.JToken)
         Dim imgUnknown As Boolean = False
         Try

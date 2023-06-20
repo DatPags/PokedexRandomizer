@@ -33,7 +33,7 @@
             pkmnInfo.moveForms = moveData.forms
             pkmnInfo.moves = moveData.moves
         End If
-        pkmnInfo.images = Await ImageEngine.Get_All_Pkmn_Images(pkmnInfo)
+        pkmnInfo.images = Await ImageEngine.Get_All_Images_For_Pkmn(pkmnInfo)
         Return pkmnInfo
     End Function
 
