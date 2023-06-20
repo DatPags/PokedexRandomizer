@@ -36,7 +36,7 @@ Public Class UtilWeb
             Dim handler As New HttpClientHandler() With {.AllowAutoRedirect = True}
             Dim ph As New ProgressMessageHandler(handler)
             AddHandler ph.HttpReceiveProgress, Sub(sender, args)
-                                                   pi.Report("Downloading new data: " + String.Format("{0:N3}", args.BytesTransferred / Convert.ToDouble(1024) / Convert.ToDouble(1024)) + " / " + String.Format("{0:N3}", args.TotalBytes / Convert.ToDouble(1024) / Convert.ToDouble(1024)) + " MB")
+                                                   pi.Report("Downloading new data: " + String.Format("{0:P1}", args.BytesTransferred / Convert.ToDouble(args.TotalBytes)))
                                                End Sub
             Dim reportClient = New HttpClient(ph)
             Return Await reportClient.GetByteArrayAsync(url)
