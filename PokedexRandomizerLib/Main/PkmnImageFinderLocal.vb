@@ -117,12 +117,12 @@ Public Class PkmnImageFinderLocal
     End Sub
 #End Region
 
-    Public Async Function GetPkmnIconListAsync(pkmnInfo As PkmnInfo, settings As Settings, cache As IImageCache) As Task(Of List(Of SixLabors.ImageSharp.Image)) Implements IPkmnImageFinder.GetPkmnIconListAsync
-        Return Await GetPkmnImageListInternalAsync(pkmnInfo, settings, cache, ICONS_DIRECTORY_NAME)
+    Public Async Function GetPkmnIconListAsync(pkmnInfo As PkmnInfo) As Task(Of List(Of SixLabors.ImageSharp.Image)) Implements IPkmnImageFinder.GetPkmnIconListAsync
+        Return Await GetPkmnImageListInternalAsync(pkmnInfo, ICONS_DIRECTORY_NAME)
     End Function
 
-    Public Async Function GetPkmnImageListAsync(pkmnInfo As PkmnInfo, settings As Settings, cache As IImageCache) As Task(Of List(Of SixLabors.ImageSharp.Image)) Implements IPkmnImageFinder.GetPkmnImageListAsync
-        Return Await GetPkmnImageListInternalAsync(pkmnInfo, settings, cache, IMAGES_DIRECTORY_NAME)
+    Public Async Function GetPkmnImageListAsync(pkmnInfo As PkmnInfo) As Task(Of List(Of SixLabors.ImageSharp.Image)) Implements IPkmnImageFinder.GetPkmnImageListAsync
+        Return Await GetPkmnImageListInternalAsync(pkmnInfo, IMAGES_DIRECTORY_NAME)
     End Function
 
     Public Function GetPkmnIconURIList(pkmnInfo As PkmnInfo) As List(Of String) Implements IPkmnImageFinderURI.GetPkmnIconURIList
@@ -154,7 +154,7 @@ Public Class PkmnImageFinderLocal
         Return paths
     End Function
 
-    Private Async Function GetPkmnImageListInternalAsync(pkmnInfo As PkmnInfo, settings As Settings, cache As IImageCache, directoryName As String) As Task(Of List(Of SixLabors.ImageSharp.Image))
+    Private Async Function GetPkmnImageListInternalAsync(pkmnInfo As PkmnInfo, directoryName As String) As Task(Of List(Of SixLabors.ImageSharp.Image))
         Dim paths = GetPkmnImageUrisInternal(pkmnInfo, directoryName)
         Dim images As New List(Of Image)
         For Each path In paths
