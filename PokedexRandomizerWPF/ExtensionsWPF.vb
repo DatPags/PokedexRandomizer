@@ -1,5 +1,6 @@
 ﻿Imports System.IO
 Imports System.Runtime.CompilerServices
+Imports System.Windows.Shell
 Imports PokedexRandomizerLib
 Imports SixLabors.ImageSharp
 
@@ -45,5 +46,31 @@ Module ExtensionsWPF
             newImg.EndInit()
             Return newImg
         End SyncLock
+    End Function
+
+    <Extension()>
+    Public Function GetIcon(pkmn As Pkmn, formIndex As Integer) As BitmapImage
+        If formIndex < pkmn.iconUris.Count Then
+            Dim newImg As New BitmapImage
+            newImg.BeginInit()
+            newImg.UriSource = New Uri(pkmn.iconUris(formIndex))
+            newImg.EndInit()
+            Return newImg
+        Else
+            Return pkmn.icons(formIndex).ToBitmapImage()
+        End If
+    End Function
+
+    <Extension()>
+    Public Function GetImage(pkmn As Pkmn, formIndex As Integer) As BitmapImage
+        If formIndex < pkmn.imageUris.Count Then
+            Dim newImg As New BitmapImage
+            newImg.BeginInit()
+            newImg.UriSource = New Uri(pkmn.imageUris(formIndex))
+            newImg.EndInit()
+            Return newImg
+        Else
+            Return pkmn.images(formIndex).ToBitmapImage()
+        End If
     End Function
 End Module

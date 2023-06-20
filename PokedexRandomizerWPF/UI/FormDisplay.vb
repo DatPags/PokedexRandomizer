@@ -25,7 +25,7 @@
         End Set
     End Property
 
-    Public Sub New(Optional image As SixLabors.ImageSharp.Image = Nothing, Optional formName As String = "")
+    Public Sub New(Optional image As BitmapImage = Nothing, Optional formName As String = "")
         Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(3, GridUnitType.Star)})
         Me.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(1, GridUnitType.Star)})
 
@@ -35,7 +35,7 @@
             .Margin = New Thickness(5, 5, 5, 5)
         }
         RenderOptions.SetBitmapScalingMode(_im, BitmapScalingMode.HighQuality)
-        Me.PkmnImage = image.ToBitmapImage
+        Me.PkmnImage = image
 
         _formText = New TextBlock With {
             .TextWrapping = TextWrapping.Wrap,
