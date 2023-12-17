@@ -172,7 +172,7 @@ Public Class Util
         If IO.File.Exists(hashPath) Then
             Dim hash As String = Await IO.File.ReadAllTextAsync(hashPath)
             Dim hashWeb As String = Await UtilWeb.GetTextFromUrlAsync(URL_DOWNLOAD)
-            If hash = hashWeb.Split(vbCrLf)(0) Then
+            If hash = hashWeb.Split(vbLf)(0).Trim Then
                 Debug.WriteLine("Hash matches - data is up to date")
                 Return False
             Else
@@ -191,9 +191,9 @@ Public Class Util
     Public Shared Async Function DownloadData(Optional pi As IProgress(Of String) = Nothing) As Task
         '--get the url of the zip file
         Dim dataText As String = Await UtilWeb.GetTextFromUrlAsync(URL_DOWNLOAD)
-        Dim dataParts As String() = dataText.Split(vbCrLf)
+        Dim dataParts As String() = dataText.Split(vbLf)
         If dataParts.Length < 2 Then Throw New Exception("Data text file is not formatted correctly")
-        Dim dataURL As String = dataParts(1)
+        Dim dataURL As String = dataParts(1).Trim
 
         '--download zip file
         Debug.WriteLine("Downloading data archive...")
@@ -214,7 +214,7 @@ Public Class Util
 
         '--download and save the hash of the zip file
         Debug.WriteLine("Updating hash value...")
-        Dim newHash As String = dataParts(0)
+        Dim newHash As String = dataParts(0).Trim
         Dim hashPath As String = IO.Path.Combine(DIRECTORY_BASE, "hash.txt")
         Await IO.File.WriteAllTextAsync(hashPath, newHash)
         Debug.WriteLine("Hash value updated: " + newHash)
