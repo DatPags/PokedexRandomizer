@@ -7,8 +7,7 @@ Imports SixLabors.ImageSharp.ImageExtensions
 Public Class Util
     Public Shared DIRECTORY_BASE As String = IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DatPags", "Pokedex Randomizer")
 
-    Public Const URL_HASH As String = "https://raw.githubusercontent.com/DatPags/PokedexRandomizer/master/hash.txt"
-    Public Const URL_DATA As String = "https://github.com/DatPags/PokedexRandomizer/raw/master/data.zip"
+    Public Const URL_DOWNLOAD As String = "https://raw.githubusercontent.com/DatPags/PokedexRandomizer/master/data-download.txt"
 
     Public Shared ReadOnly Property HttpClient As HttpClient = New HttpClient
 
@@ -172,8 +171,8 @@ Public Class Util
         Dim hashPath As String = IO.Path.Combine(DIRECTORY_BASE, "hash.txt")
         If IO.File.Exists(hashPath) Then
             Dim hash As String = Await IO.File.ReadAllTextAsync(hashPath)
-            Dim hashWeb As String = Await UtilWeb.GetTextFromUrlAsync(URL_HASH)
-            If hash = hashWeb Then
+            Dim hashWeb As String = Await UtilWeb.GetTextFromUrlAsync(URL_DOWNLOAD)
+            If hash = hashWeb.Split(vbCrLf)(0) Then
                 Debug.WriteLine("Hash matches - data is up to date")
                 Return False
             Else
@@ -190,9 +189,15 @@ Public Class Util
     End Function
 
     Public Shared Async Function DownloadData(Optional pi As IProgress(Of String) = Nothing) As Task
+        '--get the url of the zip file
+        Dim dataText As String = Await UtilWeb.GetTextFromUrlAsync(URL_DOWNLOAD)
+        Dim dataParts As String() = dataText.Split(vbCrLf)
+        If dataParts.Length < 2 Then Throw New Exception("Data text file is not formatted correctly")
+        Dim dataURL As String = dataParts(1)
+
         '--download zip file
         Debug.WriteLine("Downloading data archive...")
-        Dim bytes() = Await UtilWeb.GetBytesFromUrlAsync(URL_DATA, pi)
+        Dim bytes() = Await UtilWeb.GetBytesFromUrlAsync(dataURL, pi)
         Debug.WriteLine("Saving temporary data archive file...")
         If pi IsNot Nothing Then pi.Report("Extracting data...")
         Dim zipPath As String = IO.Path.Combine(DIRECTORY_BASE, "tempdata.zip")
@@ -209,7 +214,7 @@ Public Class Util
 
         '--download and save the hash of the zip file
         Debug.WriteLine("Updating hash value...")
-        Dim newHash As String = Await UtilWeb.GetTextFromUrlAsync(URL_HASH)
+        Dim newHash As String = dataParts(0)
         Dim hashPath As String = IO.Path.Combine(DIRECTORY_BASE, "hash.txt")
         Await IO.File.WriteAllTextAsync(hashPath, newHash)
         Debug.WriteLine("Hash value updated: " + newHash)
